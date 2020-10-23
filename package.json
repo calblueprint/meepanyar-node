@@ -4,15 +4,22 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/node": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "airlock-server": "^0.3.1",
+    "airtable": "^0.10.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "tslib": "^2.0.3"
   },
   "devDependencies": {
     "airtable-schema-generator": "^1.5.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-schema": "generate-airtable-schema"
+    "generate-schema": "generate-airtable-schema",
+    "start": "babel-node index.js"
   },
   "repository": {
     "type": "git",

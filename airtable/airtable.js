@@ -8,7 +8,7 @@
 
   If you're adding a new function: make sure you add a corresponding test (at least 1) for it in airtable.spec.js
 */
-import Airtable from '@calblueprint/airlock';
+import Airtable from 'airtable';
 import { Columns } from './schema';
 
 const BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID;
@@ -16,6 +16,8 @@ const BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID;
 const API_KEY = 'airlock';
 const ENDPOINT_URL = process.env.REACT_APP_AIRTABLE_ENDPOINT_URL;
 const VIEW = 'Grid view';
+
+console.log("Endpoint URL: ", ENDPOINT_URL);
 
 Airtable.configure({
   endpointUrl: ENDPOINT_URL,
