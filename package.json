@@ -34,7 +34,6 @@
   "homepage": "https://github.com/calblueprint/meepanyar-node#readme",
   "airtable-schema-generator": {
     "mode": "auto-headless",
-    "output": "./airtable",
-    "airlock": true
+    "output": "./airtable"
   }
 }
