@@ -13,8 +13,8 @@ import { Columns } from './schema';
 
 const BASE_ID = process.env.REACT_APP_AIRTABLE_BASE_ID;
 
-const API_KEY = 'airlock';
-const ENDPOINT_URL = process.env.REACT_APP_AIRTABLE_ENDPOINT_URL;
+const API_KEY = process.env.REACT_APP_AIRTABLE_API_KEY;
+const ENDPOINT_URL = 'https://api.airtable.com';
 const VIEW = 'Grid view';
 
 Airtable.configure({
