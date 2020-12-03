@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
-import { calculateTotalCustomers } from './utils/calculations';
+import { calculateTotalCustomers } from './utils/financialSummaryCalculations';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
