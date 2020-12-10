@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
-import { calculateTotalCustomers } from './utils/financialSummaryCalculations';
+import {
+    calculateFinancialSummaryInfo
+} from './utils/financialSummaryCalculations';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -30,10 +32,12 @@ app.get('/', (_, res) => {
 });
 
 app.get('/financialsummarycalc', (_, res) => {
-    console.log('Received request to calculate financial summary information');
     try {
-        const totalCustomers = calculateTotalCustomers();
-        res.json({ customerNumber:  totalCustomers });
+        calculateFinancialSummaryInfo()
+        .then((recordInfo) => { 
+            res.status(200); 
+            res.json(recordInfo);
+        });
     } catch (e) {
         console.log(e);
     }
