@@ -29,7 +29,7 @@ app.get('/', (_, res) => {
     res.json({ status: 'OK' })
 })
 
-app.post('/customer/create', async (req, res) => {
+app.post('/customers/create', async (req, res) => {
     const customerData = req.body;
     console.log("Customer Creation Payload: ", customerData);
 
@@ -83,11 +83,33 @@ app.post('/customer/create', async (req, res) => {
 // Endpoint used to create meter readings when the meter reading
 // contains a customer id (the customer already exists in airtable).
 app.post('/meter-readings-and-invoices/create', async (req, res) => {
-    const meterReadingData = req.body;
-    console.log("Meter reading data: ", meterReadingData);
-    const resultData = await createMeterReadingsandInvoice(meterReadingData);
-    res.status(201);
-    res.json({ status: 'OK', id: resultData });
+    try {
+        const meterReadingData = req.body;
+        console.log("Meter reading data: ", meterReadingData);
+        const resultData = await createMeterReadingsandInvoice(meterReadingData);
+        res.status(201);
+        res.json({ status: 'OK', id: resultData });
+    } catch (err) {
+        console.log('Error when creating meter reading and invoice: ', err);
+        res.status(400);
+        res.json({ error: err });
+    }
+})
+
+// Endpoint used to create payments when the payment
+// contains a customer id (the customer already exists in airtable).
+app.post('/payments/create', async (req, res) => {
+    try {
+        const paymentData = req.body;
+        console.log("Payment data: ", paymentData);
+        const resultData = await createPayment(paymentData);
+        res.status(201);
+        res.json({ status: 'OK', id: resultData });
+    } catch (err) {
+        console.log('Error when creating payment: ', err);
+        res.status(400);
+        res.json({ error: err });
+    }
 })
 
 app.listen(port, () => console.log(`Mee Panyar port ${port}!`));
