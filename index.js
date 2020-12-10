@@ -29,6 +29,11 @@ app.get('/', (_, res) => {
     res.json({ status: 'OK' })
 })
 
+// This endpoint is used to create customers from the frontend.
+// To support offline functionality while keeping our API stateless,
+// we add meterReadings and payments for offline customers into the
+// customerData payload, and create meterReadings and payments for
+// the customer created after the customer has been created in airtable.
 app.post('/customers/create', async (req, res) => {
     const customerData = req.body;
     console.log("Customer Creation Payload: ", customerData);
