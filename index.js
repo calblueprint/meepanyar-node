@@ -24,9 +24,9 @@ app.use(cors());
 app.use(express.json());
 
 
-app.get('/', (_, res) => {
-    res.status(200);
-    res.json({ status: 'OK' })
+app.get('/', (_, result) => {
+    result.status(200);
+    result.json({ status: 'OK' })
 })
 
 // This endpoint is used to create customers from the frontend.
@@ -34,8 +34,8 @@ app.get('/', (_, res) => {
 // we add meterReadings and payments for offline customers into the
 // customerData payload, and create meterReadings and payments for
 // the customer created after the customer has been created in airtable.
-app.post('/customers/create', async (req, res) => {
-    const customerData = req.body;
+app.post('/customers/create', async (request, result) => {
+    const customerData = request.body;
     console.log("Customer Creation Payload: ", customerData);
 
     try {
@@ -76,44 +76,44 @@ app.post('/customers/create', async (req, res) => {
             }
         }
 
-        res.status(201);
-        res.json({ status: 'OK' })
+        result.status(201);
+        result.json({ status: 'OK' })
     } catch (err) {
         console.log(err);
-        res.status(400);
-        res.json({ error: err });
+        result.status(400);
+        result.json({ error: err });
     }
 })
 
 // Endpoint used to create meter readings when the meter reading
 // contains a customer id (the customer already exists in airtable).
-app.post('/meter-readings-and-invoices/create', async (req, res) => {
+app.post('/meter-readings-and-invoices/create', async (request, result) => {
     try {
-        const meterReadingData = req.body;
+        const meterReadingData = request.body;
         console.log("Meter reading data: ", meterReadingData);
         const resultData = await createMeterReadingsandInvoice(meterReadingData);
-        res.status(201);
-        res.json({ status: 'OK', id: resultData });
+        result.status(201);
+        result.json({ status: 'OK', id: resultData });
     } catch (err) {
         console.log('Error when creating meter reading and invoice: ', err);
-        res.status(400);
-        res.json({ error: err });
+        result.status(400);
+        result.json({ error: err });
     }
 })
 
 // Endpoint used to create payments when the payment
 // contains a customer id (the customer already exists in airtable).
-app.post('/payments/create', async (req, res) => {
+app.post('/payments/create', async (request, result) => {
     try {
-        const paymentData = req.body;
+        const paymentData = request.body;
         console.log("Payment data: ", paymentData);
         const resultData = await createPayment(paymentData);
-        res.status(201);
-        res.json({ status: 'OK', id: resultData });
+        result.status(201);
+        result.json({ status: 'OK', id: resultData });
     } catch (err) {
         console.log('Error when creating payment: ', err);
-        res.status(400);
-        res.json({ error: err });
+        result.status(400);
+        result.json({ error: err });
     }
 })
 
