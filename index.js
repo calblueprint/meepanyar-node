@@ -3,8 +3,8 @@ import cors from 'cors';
 import Airlock from 'airlock-server';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
 
-const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
+const allowedOrigins = eval(process.env.ALLOWED_ORIGINS);
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -17,7 +17,7 @@ new Airlock({
     airtableUserTableName: 'Users',
     airtableUsernameColumn: 'Username',
     airtablePasswordColumn: 'Password',
-    allowedOrigins: ["http://localhost:3000", "http://localhost:5000"] // TODO: Change to be fetched from file
+    allowedOrigins: allowedOrigins
 });
 
 app.use(cors());
