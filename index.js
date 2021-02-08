@@ -4,13 +4,16 @@ import Airlock from 'airlock-server';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
 
 const apiKey = process.env.AIRTABLE_API_KEY;
+
+console.log("About to eval allowedOrigins");
+console.log("Without eval: ", process.env.ALLOWED_ORIGINS);
 const allowedOrigins = eval(process.env.ALLOWED_ORIGINS);
+console.log("Allowed origins: ", allowedOrigins);
 
 const app = express();
 const port = process.env.PORT || 4000;
 
 new Airlock({
-    // port: airlockPort,
     server: app,
     airtableApiKey: [apiKey],
     airtableBaseId: process.env.AIRTABLE_BASE_ID,
