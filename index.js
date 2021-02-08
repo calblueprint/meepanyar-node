@@ -7,7 +7,7 @@ const apiKey = process.env.AIRTABLE_API_KEY;
 
 console.log("About to eval allowedOrigins");
 console.log("Without eval: ", process.env.ALLOWED_ORIGINS);
-const allowedOrigins = eval(process.env.ALLOWED_ORIGINS);
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(';')
 console.log("Allowed origins: ", allowedOrigins);
 
 const app = express();
