@@ -35,10 +35,10 @@ module.exports = {
             siteRecord.fields.Customers = customers;
         }
 
-        const financialSummarieIds = siteRecord.fields["Financial Summaries"];
-        const financialSummaries = [];
-        if (financialSummarieIds) {
-            financialSummaries = await getFinancialSummariesByIds(financialSummarieIds);
+        const financialSummaryIds = siteRecord.fields["Financial Summaries"];
+        let financialSummaries = [];
+        if (financialSummaryIds) {
+            financialSummaries = await getFinancialSummariesByIds(financialSummaryIds);
         }
         siteRecord.fields.FinancialSummaries = financialSummaries;
         return siteRecord;
