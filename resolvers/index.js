@@ -2,13 +2,9 @@ const {
   getCustomersByIds,
   getMeterReadingsandInvoicesByIds,
   getPaymentsByIds,
-  getTariffPlanById,
   getTariffPlansByIds,
 } = require("../airtable/request");
-const {
-  matchCustomersWithReadingsAndPayments,
-  matchCustomersWithReadingsPaymentsAndTariff,
-} = require("../airtable/utils");
+const { matchCustomers } = require("../airtable/utils");
 
 module.exports = {
   Sites: async (siteRecord, authRecord) => {
@@ -54,12 +50,7 @@ module.exports = {
         getTariffPlansByIds(tariffPlanIds),
       ]);
 
-      matchCustomersWithReadingsPaymentsAndTariff(
-        customers,
-        meterReadings,
-        payments,
-        tariffPlans
-      );
+      matchCustomers(customers, meterReadings, payments, tariffPlans);
 
       siteRecord.fields.Customers = customers;
     }

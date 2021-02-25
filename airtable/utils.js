@@ -1,6 +1,6 @@
 // Function receives a list of customers, meterReadings, and payments,
 // and adds the appropriate meter readings, payments, and tariff info to each customer object
-export const matchCustomersWithReadingsPaymentsAndTariff = (
+export const matchCustomers = (
   customers,
   meterReadings,
   payments,
