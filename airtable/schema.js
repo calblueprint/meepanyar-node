@@ -32,7 +32,6 @@ export const Columns = {
 		customerIds: {name:`Customers`, type:`foreignKey-many`},
 		financialSummarieIds: {name:`Financial Summaries`, type:`foreignKey-many`},
 		tariffPlanIds: {name:`Tariff Plans`, type:`foreignKey-many`},
-		field6: {name:`Field 6`, type:`text`},
 	},
 	"Tariff Plans": {
 		name: {name:`Name`, type:`text`},
@@ -98,5 +97,6 @@ export const Columns = {
 		isapproved: {name:`isApproved`, type:`checkbox`},
 		lastUpdated: {name:`Last Updated`, type:`date`},
 		issubmitted: {name:`isSubmitted`, type:`checkbox`},
+		id: {name:`ID`, type:`formula`},
 	},
 };
