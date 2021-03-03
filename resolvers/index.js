@@ -30,7 +30,6 @@ module.exports = {
       customers.forEach((customer) => {
         const customerMeterReadingIds = customer.meterReadingIds;
         const customerPaymentIds = customer.paymentIds;
-        const customerTariffPlansIds = customer.tariffPlansId;
 
         if (customerMeterReadingIds) {
           meterReadingIds.push(...customerMeterReadingIds);
@@ -39,24 +38,19 @@ module.exports = {
         if (customerPaymentIds) {
           paymentIds.push(...customerPaymentIds);
         }
-
-        if (customerTariffPlansIds) {
-          tariffPlanIds.push(customerTariffPlansIds);
-        }
       });
 
-      let [meterReadings, payments, tariffPlans] = await Promise.all([
+      let [meterReadings, payments] = await Promise.all([
         getMeterReadingsandInvoicesByIds(meterReadingIds),
         getPaymentsByIds(paymentIds),
-        getTariffPlansByIds(tariffPlanIds),
       ]);
 
-      matchCustomers(customers, meterReadings, payments, tariffPlans);
+      matchCustomers(customers, meterReadings, payments);
 
       siteRecord.fields.Customers = customers;
     }
 
-    const financialSummaryIds = siteRecord.fields["Financial Summaries"];
+    const financialSummaryIds = siteRecord.fields["Fainancial Summaries"];
     let financialSummaries = [];
     if (financialSummaryIds) {
       financialSummaries = await getFinancialSummariesByIds(
@@ -64,6 +58,14 @@ module.exports = {
       );
     }
     siteRecord.fields.FinancialSummaries = financialSummaries;
+
+    const tariffPlanIds = siteRecord.fields["Tariff Plans"];
+    let tariffPlans = [];
+    if (tariffPlanIds) {
+      tariffPlans = await getTariffPlansByIds(tariffPlanIds);
+    }
+    siteRecord.fields.TariffPlans = tariffPlans;
+
     return siteRecord;
   },
 };

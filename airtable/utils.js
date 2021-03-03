@@ -1,11 +1,6 @@
 // Function receives a list of customers, meterReadings, and payments,
-// and adds the appropriate meter readings, payments, and tariff info to each customer object
-export const matchCustomers = (
-  customers,
-  meterReadings,
-  payments,
-  tariffPlans
-) => {
+// and adds the appropriate meter readings and payments to each customer object
+export const matchCustomers = (customers, meterReadings, payments) => {
   customers.forEach((customer) => {
     const customerId = customer.id;
     customer.meterReadings = [];
@@ -19,11 +14,6 @@ export const matchCustomers = (
       (payment) => payment.customerId === customerId
     );
 
-    const customerTariff = tariffPlans.filter((tariff) =>
-      tariff.customerIds.includes(customerId)
-    );
-
-    [customer.tariffPlans] = customerTariff;
     customer.meterReadings = customerMeterReadings;
     customer.payments = customerPayments;
   });
