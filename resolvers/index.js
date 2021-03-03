@@ -2,6 +2,7 @@ const {
   getCustomersByIds,
   getMeterReadingsandInvoicesByIds,
   getPaymentsByIds,
+  getFinancialSummariesByIds,
   getTariffPlansByIds,
 } = require("../airtable/request");
 const { matchCustomers } = require("../airtable/utils");
@@ -55,6 +56,14 @@ module.exports = {
       siteRecord.fields.Customers = customers;
     }
 
+    const financialSummaryIds = siteRecord.fields["Financial Summaries"];
+    let financialSummaries = [];
+    if (financialSummaryIds) {
+      financialSummaries = await getFinancialSummariesByIds(
+        financialSummaryIds
+      );
+    }
+    siteRecord.fields.FinancialSummaries = financialSummaries;
     return siteRecord;
   },
 };
