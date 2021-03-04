@@ -16,13 +16,16 @@ module.exports = {
       return false;
     }
 
+    const promises = [];
     // We resolve each site's customerId to their appropriate customer
     const customerIds = siteRecord.fields.Customers;
+    let customers = [];
+    let meterReadings = [];
+    let payments = [];
     if (customerIds) {
-      const customers = await getCustomersByIds(customerIds);
+      customers = await getCustomersByIds(customerIds);
       const meterReadingIds = [];
       const paymentIds = [];
-      const tariffPlanIds = [];
 
       // We get all the meter reading and payment ids for all customers
       // to minimize Airtable API calls, and then match the meter readings
@@ -40,30 +43,41 @@ module.exports = {
         }
       });
 
-      let [meterReadings, payments] = await Promise.all([
-        getMeterReadingsandInvoicesByIds(meterReadingIds),
-        getPaymentsByIds(paymentIds),
-      ]);
+      const meterReadingsPromise = getMeterReadingsandInvoicesByIds(
+        meterReadingIds
+      ).then((res) => (meterReadings = res));
+      promises.push(meterReadingsPromise);
 
-      matchCustomers(customers, meterReadings, payments);
-
-      siteRecord.fields.Customers = customers;
+      const paymentsPromise = getPaymentsByIds(paymentIds).then(
+        (res) => (payments = res)
+      );
+      promises.push(paymentsPromise);
     }
 
-    const financialSummaryIds = siteRecord.fields["Fainancial Summaries"];
+    const financialSummaryIds = siteRecord.fields["Financial Summaries"];
     let financialSummaries = [];
     if (financialSummaryIds) {
-      financialSummaries = await getFinancialSummariesByIds(
+      const financialSummariesPromise = getFinancialSummariesByIds(
         financialSummaryIds
-      );
+      ).then((res) => (financialSummaries = res));
+      promises.push(financialSummariesPromise);
     }
-    siteRecord.fields.FinancialSummaries = financialSummaries;
 
     const tariffPlanIds = siteRecord.fields["Tariff Plans"];
     let tariffPlans = [];
     if (tariffPlanIds) {
-      tariffPlans = await getTariffPlansByIds(tariffPlanIds);
+      const tariffPlansPromise = getTariffPlansByIds(tariffPlanIds).then(
+        (res) => (tariffPlans = res)
+      );
+      promises.push(tariffPlansPromise);
     }
+
+    // Await all promises at once
+    await Promise.all(promises);
+
+    matchCustomers(customers, meterReadings, payments);
+    siteRecord.fields.Customers = customers;
+    siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
 
     return siteRecord;
