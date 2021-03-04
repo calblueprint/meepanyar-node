@@ -39,15 +39,15 @@ app.post('/customers/create', async (request, result) => {
     console.log("Customer Creation Payload: ", customerData);
 
     try {
-        const { name, meterNumber, tariffPlansId, sitesId, meterReadings, payments } = customerData;
+        const { name, meterNumber, tariffPlanId, siteId, meterReadings, payments } = customerData;
         const hasMeter = meterNumber ? true : false;
         const isActive = true;
 
         const airtableCustomerData = {
             isactive: isActive,
             hasmeter: hasMeter,
-            tariffPlansId,
-            sitesId,
+            tariffPlanId,
+            siteId,
             name,
             meterNumber
         };
