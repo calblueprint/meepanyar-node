@@ -76,7 +76,7 @@ module.exports = {
     await Promise.all(promises);
 
     matchCustomers(customers, meterReadings, payments);
-    siteRecord.fields.Customers = customers;
+    siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
 
