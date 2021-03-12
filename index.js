@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
+import { uploadBlobAndCreateSummary } from './lib/photoUtils';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
@@ -115,6 +116,29 @@ app.post('/payments/create', async (request, result) => {
         result.status(400);
         result.json({ error: err });
     }
+})
+
+app.post('/financial-summaries/create', async (request, result) => {
+    try {
+        const financialSummaryData = request.body;
+
+        if (financialSummaryData.bankSlip.length) {
+            const bankslipURI = financialSummaryData.bankSlip[0].url;
+            const year = new Date().getFullYear();
+            const month = new Date().getMonth();
+            const randomNumber = Math.random();
+            await uploadBlobAndCreateSummary(`${year}-${month}-bankslip-${randomNumber}`, bankslipURI);
+            result.status(201);
+            result.json({ status: 'OK', id: 0 });
+        }
+
+    } catch (err) {
+        console.log(err);
+        console.log("Error occurred while creating financial summary");
+        result.status(400);
+        result.json({ error: err });
+    }
+
 })
 
 app.listen(port, () => console.log(`Mee Panyar port ${port}!`));
