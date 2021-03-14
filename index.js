@@ -117,4 +117,35 @@ app.post('/payments/create', async (request, result) => {
     }
 })
 
+// Endpoint used to edit customer
+app.post('/customers/customer/edit', async (request, result) => {
+    const customerData = request.body;
+    console.log("Customer Creation Payload: ", customerData);
+
+    try {
+        const { name, tariffPlanId, reason } = customerData;
+        const hasMeter = meterNumber ? true : false;
+        const isActive = true;
+
+        const airtableCustomerData = {
+            isactive: isActive,
+            hasmeter: hasMeter,
+            tariffPlanId,
+            name,
+            explanation: reason,
+        };
+
+        const customerId = await createCustomer(airtableCustomerData);
+        console.log("Customer id: ", customerId);
+        console.log("Customer edited!");
+
+        result.status(201);
+        result.json({ status: 'OK' })
+    } catch (err) {
+        console.log(err);
+        result.status(400);
+        result.json({ error: err });
+    }
+})
+
 app.listen(port, () => console.log(`Mee Panyar port ${port}!`));
