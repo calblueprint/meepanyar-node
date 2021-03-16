@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
 import { uploadBlobAndCreateSummary } from './lib/photoUtils';
-import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
+import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, createFinancialSummarie } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -127,9 +127,20 @@ app.post('/financial-summaries/create', async (request, result) => {
             const year = new Date().getFullYear();
             const month = new Date().getMonth();
             const randomNumber = Math.random();
-            await uploadBlobAndCreateSummary(`${year}-${month}-bankslip-${randomNumber}`, bankslipURI);
+            const bankSlipURL = await uploadBlobAndCreateSummary(`${year}-${month}-bankslip-${randomNumber}`, bankslipURI);
+
+            let financialSummaryPayload = {
+            }
+
+            if (bankSlipURL) {
+                financialSummaryPayload.bankSlip = [
+                    { url: bankSlipURL }
+                ]
+            }
+            const financialSummaryId = await createFinancialSummarie(financialSummaryPayload);
+
             result.status(201);
-            result.json({ status: 'OK', id: 0 });
+            result.json({ status: 'OK', id: financialSummaryId });
         }
 
     } catch (err) {
