@@ -130,6 +130,7 @@ app.post('/financial-summaries/create', async (request, result) => {
             const randomNumber = Math.random();
             const bankSlipURL = await uploadBlobAndCreateSummary(`${year}-${month}-${randomNumber}`, bankslipURI);
 
+            // TODO: Grab actual data from financial summaries here
             let financialSummaryPayload = {
             }
 
