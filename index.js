@@ -22,7 +22,8 @@ new Airlock({
 });
 
 app.use(cors());
-app.use(express.json());
+// Larger limit used to handle base64 data URIs
+app.use(express.json({ limit: '200mb' }));
 
 
 app.get('/', (_, result) => {
@@ -127,7 +128,7 @@ app.post('/financial-summaries/create', async (request, result) => {
             const year = new Date().getFullYear();
             const month = new Date().getMonth();
             const randomNumber = Math.random();
-            const bankSlipURL = await uploadBlobAndCreateSummary(`${year}-${month}-bankslip-${randomNumber}`, bankslipURI);
+            const bankSlipURL = await uploadBlobAndCreateSummary(`${year}-${month}-${randomNumber}`, bankslipURI);
 
             let financialSummaryPayload = {
             }
