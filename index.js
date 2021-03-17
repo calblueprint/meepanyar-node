@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import Airlock from 'airlock-server';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
 
@@ -25,7 +24,6 @@ new Airlock({
     ]
 });
 
-app.use(cors());
 app.use(express.json());
 
 
