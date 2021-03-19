@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
-import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
+import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, updateCustomer, createManyCustomerUpdates } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -118,26 +118,59 @@ app.post('/payments/create', async (request, result) => {
 })
 
 // Endpoint used to edit customer
-app.post('/customers/customer/edit', async (request, result) => {
+app.post('/customers/edit', async (request, result) => {
     const customerData = request.body;
-    console.log("Customer Creation Payload: ", customerData);
+    console.log("Customer Edit Payload: ", customerData);
 
     try {
-        const { name, tariffPlanId, reason } = customerData;
-        const hasMeter = meterNumber ? true : false;
-        const isActive = true;
-
+        const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, meterReadings, payments, customerUpdates } = customerData;
         const airtableCustomerData = {
-            isactive: isActive,
-            hasmeter: hasMeter,
+            isactive,
+            hasmeter,
             tariffPlanId,
+            siteId,
             name,
-            explanation: reason,
+            meterNumber,
         };
 
-        const customerId = await createCustomer(airtableCustomerData);
+        console.log("Airtable Data: ", airtableCustomerData);
+
+        const customerId = await updateCustomer(airtableCustomerData);
         console.log("Customer id: ", customerId);
         console.log("Customer edited!");
+
+        result.status(201);
+        result.json({ status: 'OK' })
+
+        if (meterReadings) {
+            try {
+                meterReadings.forEach(meterReading => meterReading.customerId = customerId);
+                createManyMeterReadingsandInvoices(meterReadings);
+                console.log("Created meter readings")
+            } catch (err) {
+                console.log("Meter reading error: ", err);
+            }
+        }
+
+        if (payments) {
+            try {
+                payments.forEach(payment => payment.customerId = customerId);
+                createManyPayments(payments)
+                console.log("Created payments")
+            } catch (err) {
+                console.log("Payments error: ", err);
+            }
+        }
+
+        if (customerUpdates) {
+          try {
+              customerUpdates.forEach(update => update.customerId = customerId);
+              createManyCustomerUpdates(customerUpdates);
+              console.log("Created updates")
+          } catch (err) {
+              console.log("Updates error: ", err);
+          }
+        }
 
         result.status(201);
         result.json({ status: 'OK' })
