@@ -197,6 +197,7 @@ function getRecordsByAttribute(
 // Given a table, a record ID, and an object of fields to update, update a record on Airtable.
 function updateRecord(table, id, updatedRecord) {
   const transformedRecord = toAirtableFormat(updatedRecord, table);
+  console.log(transformedRecord);
   return base(table)
     .update([
       {

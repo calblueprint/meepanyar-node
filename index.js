@@ -123,7 +123,7 @@ app.post('/customers/edit', async (request, result) => {
     console.log("Customer Edit Payload: ", customerData);
 
     try {
-        const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, meterReadings, payments, customerUpdates } = customerData;
+        const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, customerId, customerUpdates } = customerData;
         const airtableCustomerData = {
             isactive,
             hasmeter,
@@ -133,35 +133,13 @@ app.post('/customers/edit', async (request, result) => {
             meterNumber,
         };
 
-        console.log("Airtable Data: ", airtableCustomerData);
-
-        const customerId = await updateCustomer(airtableCustomerData);
-        console.log("Customer id: ", customerId);
+        await updateCustomer(customerId, airtableCustomerData);
         console.log("Customer edited!");
 
         result.status(201);
         result.json({ status: 'OK' })
 
-        if (meterReadings) {
-            try {
-                meterReadings.forEach(meterReading => meterReading.customerId = customerId);
-                createManyMeterReadingsandInvoices(meterReadings);
-                console.log("Created meter readings")
-            } catch (err) {
-                console.log("Meter reading error: ", err);
-            }
-        }
-
-        if (payments) {
-            try {
-                payments.forEach(payment => payment.customerId = customerId);
-                createManyPayments(payments)
-                console.log("Created payments")
-            } catch (err) {
-                console.log("Payments error: ", err);
-            }
-        }
-
+        /*
         if (customerUpdates) {
           try {
               customerUpdates.forEach(update => update.customerId = customerId);
@@ -173,7 +151,7 @@ app.post('/customers/edit', async (request, result) => {
         }
 
         result.status(201);
-        result.json({ status: 'OK' })
+        result.json({ status: 'OK' })*/
     } catch (err) {
         console.log(err);
         result.status(400);
