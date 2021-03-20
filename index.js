@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
-import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, updateCustomer, createManyCustomerUpdates } from './airtable/request';
+import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, updateCustomer, createCustomerUpdate } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -123,7 +123,8 @@ app.post('/customers/edit', async (request, result) => {
     console.log("Customer Edit Payload: ", customerData);
 
     try {
-        const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, customerId, customerUpdates } = customerData;
+        const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, id, customerUpdate } = customerData;
+        const { dateUpdated, customerIds, explanation, userId } = customerUpdate;
         const airtableCustomerData = {
             isactive,
             hasmeter,
@@ -132,26 +133,25 @@ app.post('/customers/edit', async (request, result) => {
             name,
             meterNumber,
         };
+        const airtableCustomerUpdate = {
+            dateUpdated,
+            customerIds,
+            explanation,
+            userId: userId[0]
+        };
 
-        await updateCustomer(customerId, airtableCustomerData);
+        await updateCustomer(id, airtableCustomerData);
         console.log("Customer edited!");
 
         result.status(201);
         result.json({ status: 'OK' })
 
-        /*
-        if (customerUpdates) {
-          try {
-              customerUpdates.forEach(update => update.customerId = customerId);
-              createManyCustomerUpdates(customerUpdates);
-              console.log("Created updates")
-          } catch (err) {
-              console.log("Updates error: ", err);
-          }
-        }
+        const updateId = await createCustomerUpdate(airtableCustomerUpdate);
+        console.log("Update id: ", updateId);
+        console.log("Created updates!");
 
         result.status(201);
-        result.json({ status: 'OK' })*/
+        result.json({ status: 'OK' })
     } catch (err) {
         console.log(err);
         result.status(400);
