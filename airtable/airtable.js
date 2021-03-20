@@ -98,7 +98,7 @@ const toAirtableFormat = (record, table) => {
 function createRecord(table, record) {
   const transformedRecord = toAirtableFormat(record, table);
   return base(table)
-    .create([{ fields: transformedRecord }])
+    .create([{ fields: transformedRecord }], { typecast: true })
     .then((records) => {
       return records[0].getId();
     })

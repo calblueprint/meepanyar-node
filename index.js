@@ -137,18 +137,28 @@ app.post('/customers/edit', async (request, result) => {
             dateUpdated,
             customerIds,
             explanation,
-            userId: userId[0]
+            userId
         };
 
         await updateCustomer(id, airtableCustomerData);
         console.log("Customer edited!");
 
-        result.status(201);
-        result.json({ status: 'OK' })
+        let attemptCount = 0;
+        const maxAttemptCount = 5;
 
-        const updateId = await createCustomerUpdate(airtableCustomerUpdate);
-        console.log("Update id: ", updateId);
-        console.log("Created updates!");
+        while (attemptCount < maxAttemptCount) {
+          try {
+            const updateId = await createCustomerUpdate(airtableCustomerUpdate);
+            console.log("Update id: ", updateId);
+            console.log("Created updates!");
+            break;
+          } catch (err) {
+            console.log(err);
+            result.status(400);
+            result.json({ error: err });
+            attemptCount += 1;
+          }
+        }
 
         result.status(201);
         result.json({ status: 'OK' })
