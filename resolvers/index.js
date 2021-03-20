@@ -4,8 +4,12 @@ const {
   getPaymentsByIds,
   getFinancialSummariesByIds,
   getTariffPlansByIds,
+  getAllProducts,
+  getInventorysByIds,
+  getPurchaseRequestsByIds,
+  getInventoryUpdatesByIds,
 } = require("../airtable/request");
-const { matchCustomers } = require("../airtable/utils");
+const { matchCustomers, tsPromise } = require("../airtable/utils");
 
 module.exports = {
   Sites: async (siteRecord, authRecord) => {
@@ -72,14 +76,61 @@ module.exports = {
       promises.push(tariffPlansPromise);
     }
 
+    let products = [];
+    const productsPromise = getAllProducts().then((res) => (products = res));
+    promises.push(productsPromise);
+
+    const inventoryIds = siteRecord.fields.Inventory;
+    let inventory = [];
+    if (inventoryIds) {
+      const inventoryPromise = getInventorysByIds(inventoryIds).then(
+        (res) => (inventory = res)
+      );
+      promises.push(inventoryPromise);
+    }
+
     // Await all promises at once
     await Promise.all(promises);
+    promises.length = 0; // clear promises
+
+    // These are dependent on inventory already being loaded
+    const inventoryWithPurchaseRequests = inventory.filter(
+      (inv) => inv.purchaseRequestIds
+    );
+    let purchaseRequests = [];
+    let purchaseRequestPromise = Promise.all(
+      inventoryWithPurchaseRequests.map(async (item) =>
+        getPurchaseRequestsByIds(item.purchaseRequestIds)
+      )
+    ).then((data) => (purchaseRequests = data));
+    promises.push(purchaseRequestPromise);
+
+    const inventoryWithUpdates = inventory.filter(
+      (inv) => inv.inventoryUpdateIds
+    );
+    let inventoryUpdates = [];
+    let inventoryUpdatesPromise = Promise.all(
+      inventoryWithUpdates.map(async (item) =>
+        getInventoryUpdatesByIds(item.inventoryUpdateIds)
+      )
+    ).then((data) => (inventoryUpdates = data));
+    promises.push(inventoryUpdatesPromise);
+
+    // Await inventory updates and purchase requests
+    await Promise.all(promises);
+    purchaseRequests = purchaseRequests.flat();
+    inventoryUpdates = inventoryUpdates.flat();
 
     matchCustomers(customers, meterReadings, payments);
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
 
+    // Inventory fields
+    siteRecord.fields.Products = products;
+    siteRecord.fields.SiteInventory = inventory;
+    siteRecord.fields.PurchaseRequests = purchaseRequests;
+    siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
   },
 };
