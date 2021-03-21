@@ -4,7 +4,6 @@ import express from "express";
 import {
   createCustomer,
   createInventory,
-  createInventoryUpdate,
   createManyMeterReadingsandInvoices,
   createManyPayments,
   createMeterReadingsandInvoice,
@@ -134,8 +133,7 @@ app.post("/payments/create", async (request, result) => {
 });
 
 // Endpoint used to create a new inventory item.
-// Also logs the update in an InventoryUpdate.
-// contains a site id (the site already exists in airtable).
+// Contains a site id (the site already exists in airtable).
 app.post("/inventory/create", async (request, result) => {
   try {
     const inventoryData = request.body;
@@ -147,33 +145,10 @@ app.post("/inventory/create", async (request, result) => {
     console.log("Inventory id:", inventoryId);
     console.log("Inventory created!");
 
-    // TODO: add creation of inventory update
     result.status(201);
-    result.json({ status: "OK", iid: inventoryId });
+    result.json({ status: "OK", id: inventoryId });
   } catch (err) {
     console.log("Error when creating inventory: ", err);
-    result.status(400);
-    result.json({ error: err });
-  }
-});
-
-// Endpoint used to create a new inventory update.
-// contains a site id (the site already exists in airtable).
-app.post("/inventory-update/create", async (request, result) => {
-  try {
-    const updateData = request.body;
-    // Remove the blank id field
-    delete updateData.id;
-    console.log("Inventory Update data: ", updateData);
-
-    const inventoryUpdateId = await createInventoryUpdate(updateData);
-    console.log("Inventory Update id:", inventoryId);
-    console.log("Inventory Update created!");
-
-    result.status(201);
-    result.json({ status: "OK", id: inventoryUpdateId });
-  } catch (err) {
-    console.log("Error when creating inventory update: ", err);
     result.status(400);
     result.json({ error: err });
   }
