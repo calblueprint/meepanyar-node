@@ -93,7 +93,7 @@ module.exports = {
     await Promise.all(promises);
     promises.length = 0; // clear promises
 
-    // These are dependent on inventory already being loaded
+    // Load purchase requests and inventory updates based on loaded inventory
     const inventoryWithPurchaseRequests = inventory.filter(
       (inv) => inv.purchaseRequestIds
     );
