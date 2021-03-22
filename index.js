@@ -1,10 +1,11 @@
 import express from 'express';
-import cors from 'cors';
 import Airlock from 'airlock-server';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
+const PRODUCTION_WEB_URL = process.env.PRODUCTION_WEB_URL;
+const DEVELOPMENT_WEB_URLS = ['http://localhost:3000', 'http://localhost:5000']
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -17,10 +18,12 @@ new Airlock({
     airtableUserTableName: 'Users',
     airtableUsernameColumn: 'Username',
     airtablePasswordColumn: 'Password',
-    allowedOrigins: ["http://localhost:3000", "http://localhost:5000"] // TODO: Change to be fetched from file
+    allowedOrigins: [
+        PRODUCTION_WEB_URL,
+        ...DEVELOPMENT_WEB_URLS
+    ]
 });
 
-app.use(cors());
 app.use(express.json());
 
 
