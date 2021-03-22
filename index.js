@@ -7,7 +7,7 @@ import {
   createManyMeterReadingsandInvoices,
   createManyPayments,
   createMeterReadingsandInvoice,
-  createPayment,
+  createPayment
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;

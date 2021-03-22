@@ -9,7 +9,7 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
-const { matchCustomers, tsPromise } = require("../airtable/utils");
+const { matchCustomers } = require("../airtable/utils");
 
 module.exports = {
   Sites: async (siteRecord, authRecord) => {
@@ -94,6 +94,9 @@ module.exports = {
     promises.length = 0; // clear promises
 
     // Load purchase requests and inventory updates based on loaded inventory
+
+    // NOTE: this could be done with fewer requests (by pooling all the purchaseRequestIds for
+    // all items and making a single getPurchaseRequestsByIds call) but this shouldn't be a bottleneck
     const inventoryWithPurchaseRequests = inventory.filter(
       (inv) => inv.purchaseRequestIds
     );
@@ -105,6 +108,7 @@ module.exports = {
     ).then((data) => (purchaseRequests = data));
     promises.push(purchaseRequestPromise);
 
+    // NOTE: this could also be done with fewer requests but shouldn't be a bottleneck
     const inventoryWithUpdates = inventory.filter(
       (inv) => inv.inventoryUpdateIds
     );
