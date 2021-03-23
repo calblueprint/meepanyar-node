@@ -6,7 +6,8 @@ import {
   createManyMeterReadingsandInvoices,
   createManyPayments,
   createMeterReadingsandInvoice,
-  createPayment
+  createPayment,
+  createPurchaseRequest
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
@@ -143,6 +144,28 @@ app.post("/inventory/create", async (request, result) => {
     result.json({ status: "OK", id: inventoryId });
   } catch (err) {
     console.log("Error when creating inventory: ", err);
+    result.status(400);
+    result.json({ error: err });
+  }
+});
+
+// Endpoint used to create a new purchase request.
+// Contains a site id (the site already exists in airtable).
+app.post("/purchase-request/create", async (request, result) => {
+  try {
+    const purchaseRequestData = request.body;
+    // Remove the blank id field
+    delete purchaseRequestData.id;
+    console.log("Purchase Request data: ", purchaseRequestData);
+
+    const purchaseRequestId = await createPurchaseRequest(purchaseRequestData);
+    console.log("Purchase request id:", purchaseRequestId);
+    console.log("Purchase request created!");
+
+    result.status(201);
+    result.json({ status: "OK", id: purchaseRequestId });
+  } catch (err) {
+    console.log("Error when creating purchase request: ", err);
     result.status(400);
     result.json({ error: err });
   }
