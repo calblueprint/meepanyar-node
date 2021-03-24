@@ -7,7 +7,8 @@ import {
   createManyPayments,
   createMeterReadingsandInvoice,
   createPayment,
-  createPurchaseRequest
+  createPurchaseRequest,
+  updatePurchaseRequest
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
@@ -166,6 +167,27 @@ app.post("/purchase-request/create", async (request, result) => {
     result.json({ status: "OK", id: purchaseRequestId });
   } catch (err) {
     console.log("Error when creating purchase request: ", err);
+    result.status(400);
+    result.json({ error: err });
+  }
+});
+
+
+// Endpoint used to review (approve/deny) a purchase request.
+app.post("/purchase-request/review", async (request, result) => {
+  try {
+    const reviewData = request.body; // prid, revier id, time, new status
+    const purchaseRequestId = reviewData.id;
+    delete reviewData.id;
+    console.log("Purchase Request Review data for request ", purchaseRequestId, " :", reviewData);
+
+    await updatePurchaseRequest(purchaseRequestId, reviewData);
+    console.log("Purchase request reviewed!");
+
+    result.status(201);
+    result.json({ status: "OK" });
+  } catch (err) {
+    console.log("Error when reviewing purchase request: ", err);
     result.status(400);
     result.json({ error: err });
   }
