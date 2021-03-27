@@ -1,16 +1,14 @@
 import express from 'express';
 import Airlock from 'airlock-server';
 import { uploadBlob, deleteBlob } from './lib/photoUtils';
-import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, createFinancialSummarie } from './airtable/request';
-import Airlock from "airlock-server";
-import express from "express";
 import {
   createCustomer,
   createInventory,
   createManyMeterReadingsandInvoices,
   createManyPayments,
   createMeterReadingsandInvoice,
-  createPayment
+  createPayment,
+  createFinancialSummarie
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
