@@ -124,7 +124,7 @@ app.post('/customers/edit', async (request, result) => {
 
     try {
         const { name, tariffPlanId, siteId, meterNumber, hasmeter, isactive, id, customerUpdate } = customerData;
-        const { dateUpdated, customerIds, explanation, userId } = customerUpdate;
+        const { dateUpdated, customerId, explanation, userId } = customerUpdate;
         const airtableCustomerData = {
             isactive,
             hasmeter,
@@ -135,7 +135,7 @@ app.post('/customers/edit', async (request, result) => {
         };
         const airtableCustomerUpdate = {
             dateUpdated,
-            customerIds,
+            customerId,
             explanation,
             userId
         };
