@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import Airlock from 'airlock-server';
-import { uploadBlobAndCreateSummary } from './lib/photoUtils';
+import { uploadBlob, deleteBlob } from './lib/photoUtils';
 import { createCustomer, createManyMeterReadingsandInvoices, createManyPayments, createMeterReadingsandInvoice, createPayment, createFinancialSummarie } from './airtable/request';
 
 const airlockPort = process.env.PORT || 4000;
@@ -119,6 +119,7 @@ app.post('/payments/create', async (request, result) => {
     }
 })
 
+// TODO: ENDPOINT IS FOR TESTING CONVENIENCE ONLY. SHOULD DELETE BEFORE MERGE.
 app.post('/financial-summaries/create', async (request, result) => {
     try {
         const financialSummaryData = request.body;
@@ -128,9 +129,9 @@ app.post('/financial-summaries/create', async (request, result) => {
             const year = new Date().getFullYear();
             const month = new Date().getMonth();
             const randomNumber = Math.random();
-            const bankSlipURL = await uploadBlobAndCreateSummary(`${year}-${month}-${randomNumber}`, bankslipURI);
+            const blobName = `${year}-${month}-${randomNumber}`
+            const bankSlipURL = await uploadBlob(blobName, bankslipURI);
 
-            // TODO: Grab actual data from financial summaries here
             let financialSummaryPayload = {
             }
 
@@ -140,6 +141,12 @@ app.post('/financial-summaries/create', async (request, result) => {
                 ]
             }
             const financialSummaryId = await createFinancialSummarie(financialSummaryPayload);
+
+            // We delete the blob after 10 seconds to allow time for Airtable to download the blob to its own system
+            // TBH i'm not sure if deleting is standard practice. Blob storage is probably cheap enough to not have to delete.
+            if (bankSlipURL) {
+                setTimeout(() => deleteBlob(blobName), 10000);
+            }
 
             result.status(201);
             result.json({ status: 'OK', id: financialSummaryId });
