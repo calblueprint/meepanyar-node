@@ -1,5 +1,5 @@
-import express from 'express';
 import Airlock from 'airlock-server';
+import express from 'express';
 import { uploadBlob, deleteBlob } from './lib/photoUtils';
 import {
   createCustomer,
