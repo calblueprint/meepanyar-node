@@ -86,7 +86,7 @@ app.post('/customers/create', async (request, result) => {
       }
 
       result.status(201);
-      result.json({ status: 'OK' })
+      result.json({ status: 'OK', id: customerId })
   } catch (err) {
       console.log(err);
       result.status(400);
