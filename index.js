@@ -148,4 +148,16 @@ app.post("/inventory/create", async (request, result) => {
   }
 });
 
+app.post("/financial-summaries/update", async (request, result) => {
+    const { month, year, siteId } = request.body;
+
+    // const getMeterReadingsInMonth;
+    // const getPaymentsInMonth;
+    // const getCustomers;
+
+    console.log(`Month: ${month}, Year: ${year}, SiteId: ${siteId}`);
+    result.status(201);
+    result.json({ status: "OK"})
+})
+
 app.listen(port, () => console.log(`Mee Panyar port ${port}!`));

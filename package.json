@@ -11,6 +11,8 @@
     "airtable": "^0.10.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "node-fetch": "^2.6.1",
     "tslib": "^2.0.3"
   },
   "devDependencies": {
@@ -20,6 +22,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate-schema": "generate-airtable-schema",
     "start": "babel-node index.js",
+    "update-summaries": "babel-node -r dotenv/config scripts/updateFinancialSummaryData.js",
     "generate-keys": "cd config && openssl genrsa -out jwt.key 2048 && openssl rsa -in jwt.key -outform PEM -pubout -out jwt.key.pub",
     "heroku-postbuild": "npm run generate-keys"
   },

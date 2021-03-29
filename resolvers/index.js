@@ -1,3 +1,4 @@
+const { restrictColumns } = require("airlock-server");
 const {
   getCustomersByIds,
   getMeterReadingsandInvoicesByIds,
@@ -12,6 +13,10 @@ const {
 const { matchCustomers } = require("../airtable/utils");
 
 module.exports = {
+  Users: restrictColumns((userRecord, authRecord) => {
+    console.log("User access resolver invoked");
+    return userRecord.id === authRecord.id;
+  }, ["Purchase Requests", "Purchase Requests 2", "Password", "Email", "Payments", "Meter Readings and Invoices", "Customer Updates", "Inventory Updates"]),
   Sites: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
