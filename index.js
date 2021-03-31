@@ -1,12 +1,12 @@
-import Airlock from "airlock-server";
-import express from "express";
+import Airlock from 'airlock-server';
+import express from 'express';
 import {
   createCustomer,
   createInventory,
   createManyMeterReadingsandInvoices,
   createManyPayments,
   createMeterReadingsandInvoice,
-  createPayment
+  createPayment,
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
@@ -31,6 +31,8 @@ new Airlock({
     ]
 });
 
+// Larger limit used to handle base64 data URIs
+app.use(express.json({ limit: '200mb' }));
 app.use(express.json());
 
 app.get('/', (_, result) => {
