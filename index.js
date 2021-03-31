@@ -1,6 +1,5 @@
 import Airlock from 'airlock-server';
 import express from 'express';
-import { uploadBlob, deleteBlob } from './lib/photoUtils';
 import {
   createCustomer,
   createInventory,
@@ -8,7 +7,6 @@ import {
   createManyPayments,
   createMeterReadingsandInvoice,
   createPayment,
-  createFinancialSummarie
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
@@ -130,47 +128,6 @@ app.post('/payments/create', async (request, result) => {
   }
 })
 
-// TODO: ENDPOINT IS FOR TESTING CONVENIENCE ONLY. SHOULD DELETE BEFORE MERGE.
-app.post('/financial-summaries/create', async (request, result) => {
-    try {
-        const financialSummaryData = request.body;
-
-        if (financialSummaryData.bankSlip.length) {
-            const bankslipURI = financialSummaryData.bankSlip[0].url;
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth();
-            const randomNumber = Math.random();
-            const blobName = `${year}-${month}-${randomNumber}`
-            const bankSlipURL = await uploadBlob(blobName, bankslipURI);
-
-            let financialSummaryPayload = {
-            }
-
-            if (bankSlipURL) {
-                financialSummaryPayload.bankSlip = [
-                    { url: bankSlipURL }
-                ]
-            }
-            const financialSummaryId = await createFinancialSummarie(financialSummaryPayload);
-
-            // We delete the blob after 10 seconds to allow time for Airtable to download the blob to its own system
-            // TBH i'm not sure if deleting is standard practice. Blob storage is probably cheap enough to not have to delete.
-            if (bankSlipURL) {
-                setTimeout(() => deleteBlob(blobName), 10000);
-            }
-
-            result.status(201);
-            result.json({ status: 'OK', id: financialSummaryId });
-        }
-
-    } catch (err) {
-        console.log(err);
-        console.log("Error occurred while creating financial summary");
-        result.status(400);
-        result.json({ error: err });
-    }
-
-})
 // Endpoint used to create a new inventory item.
 // Contains a site id (the site already exists in airtable).
 app.post("/inventory/create", async (request, result) => {
