@@ -1,5 +1,5 @@
-import Airlock from "airlock-server";
-import express from "express";
+import Airlock from 'airlock-server';
+import express from 'express';
 import {
   createCustomer,
   createInventory,
@@ -29,6 +29,8 @@ new Airlock({
     ]
 });
 
+// Larger limit used to handle base64 data URIs
+app.use(express.json({ limit: '200mb' }));
 app.use(express.json());
 
 app.get('/', (_, result) => {
@@ -84,7 +86,7 @@ app.post('/customers/create', async (request, result) => {
       }
 
       result.status(201);
-      result.json({ status: 'OK' })
+      result.json({ status: 'OK', id: customerId })
   } catch (err) {
       console.log(err);
       result.status(400);
