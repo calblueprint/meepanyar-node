@@ -30,7 +30,7 @@ export const Columns = {
 		meterReadingsAndInvoiceIds: {name:`Meter Readings and Invoices`, type:`foreignKey-many`},
 		customerUpdateIds: {name:`Customer Updates`, type:`foreignKey-many`},
 		id: {name:`ID`, type:`formula`},
-		purchaseRequestIds: {name:`Purchase Requests`, type:`foreignKey-many`},
+		purchaseRequestsCreatedIds: {name:`Purchase Requests Created`, type:`foreignKey-many`},
 		purchaseRequestsReviewedIds: {name:`Purchase Requests Reviewed`, type:`foreignKey-many`},
 		inventoryUpdateIds: {name:`Inventory Updates`, type:`foreignKey-many`},
 		organization: {name:`Organization`, type:`text`},
