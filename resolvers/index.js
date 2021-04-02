@@ -137,4 +137,21 @@ module.exports = {
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
   },
+  PurchaseRequests: async (purchaseRequestRecord, authRecord) => {
+    console.log("hello");
+  },
+  // PurchaseRequests: {
+  //   write: async (purchaseRequestRecord, authRecord) => {
+  //     console.log( "access resolver purchaserequests!", purchaseRequestRecord);
+  //     const dataURI = purchaseRequestRecord.receipt[0].url;
+
+  //     const year = new Date().getFullYear();
+  //     const month = new Date().getMonth();
+  //     const randomNumber = Math.random();
+  //     const blobName = `${year}-${month}-${randomNumber}`;
+  //     const photoUrl = await uploadBlob(blobName, dataURI);
+  //     console.log("heres the photo url", photoUrl);
+  //     purchaseRequestRecord.receipt = photoUrl;
+  //   },
+  // },
 };
