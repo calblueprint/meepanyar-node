@@ -10,9 +10,11 @@ const {
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
 const { matchCustomers } = require("../airtable/utils");
+import { Tables } from "../airtable/schema";
+import { uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
-  Sites: async (siteRecord, authRecord) => {
+  [Tables.Sites]: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
       !siteRecord.fields.Users.includes(authRecord.id)
@@ -137,21 +139,25 @@ module.exports = {
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
   },
-  PurchaseRequests: async (purchaseRequestRecord, authRecord) => {
-    console.log("hello");
+  [Tables.PurchaseRequests]: {
+    write: async (purchaseRequestRecord, authRecord) => {
+      if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
+        const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
+        try {
+          const year = new Date().getFullYear();
+          const month = new Date().getMonth();
+          const randomNumber = Math.random();
+          const blobName = `${year}-${month}-${randomNumber}`;
+          const photoUrl = await uploadBlob(blobName, dataURI);
+          purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
+        } catch (error) {
+          console.log("error in write", error);
+        }
+        console.log("final pr record", purchaseRequestRecord);
+      } else {
+        console.log("skipping image stuff");
+      }
+      return purchaseRequestRecord;
+    },
   },
-  // PurchaseRequests: {
-  //   write: async (purchaseRequestRecord, authRecord) => {
-  //     console.log( "access resolver purchaserequests!", purchaseRequestRecord);
-  //     const dataURI = purchaseRequestRecord.receipt[0].url;
-
-  //     const year = new Date().getFullYear();
-  //     const month = new Date().getMonth();
-  //     const randomNumber = Math.random();
-  //     const blobName = `${year}-${month}-${randomNumber}`;
-  //     const photoUrl = await uploadBlob(blobName, dataURI);
-  //     console.log("heres the photo url", photoUrl);
-  //     purchaseRequestRecord.receipt = photoUrl;
-  //   },
-  // },
 };
