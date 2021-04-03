@@ -151,11 +151,8 @@ module.exports = {
           const photoUrl = await uploadBlob(blobName, dataURI);
           purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
         } catch (error) {
-          console.log("error in write", error);
+          console.log("Error in PurchaseRequests write resolver: ", error);
         }
-        console.log("final pr record", purchaseRequestRecord);
-      } else {
-        console.log("skipping image stuff");
       }
       return purchaseRequestRecord;
     },
