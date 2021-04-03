@@ -11,7 +11,7 @@ const {
 } = require("../airtable/request");
 const { matchCustomers } = require("../airtable/utils");
 import { Tables } from "../airtable/schema";
-import { uploadBlob } from "../lib/photoUtils";
+import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
   [Tables.Sites]: async (siteRecord, authRecord) => {
@@ -144,11 +144,7 @@ module.exports = {
       if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
         const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
         try {
-          const year = new Date().getFullYear();
-          const month = new Date().getMonth();
-          const randomNumber = Math.random();
-          const blobName = `${year}-${month}-${randomNumber}`;
-          const photoUrl = await uploadBlob(blobName, dataURI);
+          const photoUrl = await uploadBlob(generateFileName(), dataURI);
           purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
         } catch (error) {
           console.log("Error in PurchaseRequests write resolver: ", error);
