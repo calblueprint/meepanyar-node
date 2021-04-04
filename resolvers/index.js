@@ -9,10 +9,11 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
+import { Tables } from "../airtable/schema";
 const { matchCustomers } = require("../airtable/utils");
 
 module.exports = {
-  Sites: async (siteRecord, authRecord) => {
+  [Tables.Sites]: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
       !siteRecord.fields.Users.includes(authRecord.id)
@@ -136,5 +137,15 @@ module.exports = {
     siteRecord.fields.PurchaseRequests = purchaseRequests;
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
+  },
+  [Tables.Users]: {
+    read: async (userRecord, authRecord) => {
+      if (authRecord.id !== userRecord.id && !authRecord.fields.Admin) {
+        console.log("ID mismatch or user is not an Admin.");
+        return false;
+      }
+      console.log("Authorized", userRecord.fields.Username);
+      return userRecord;
+    },
   },
 };
