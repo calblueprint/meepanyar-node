@@ -125,10 +125,12 @@ module.exports = {
     purchaseRequests = purchaseRequests.flat();
     inventoryUpdates = inventoryUpdates.flat();
 
-    matchCustomers(customers, meterReadings, payments);
+    // Customer Fields
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
+    siteRecord.fields.Payments = payments;
+    siteRecord.fields.MeterReadings = meterReadings;
 
     // Inventory fields
     siteRecord.fields.Products = products;
