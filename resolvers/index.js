@@ -9,7 +9,6 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
-const { matchCustomers } = require("../airtable/utils");
 
 module.exports = {
   Sites: async (siteRecord, authRecord) => {
