@@ -8,7 +8,7 @@
     "@babel/core": "^7.12.3",
     "@babel/node": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
-    "airlock-server": "^0.3.2",
+    "airlock-server": "^0.3.3",
     "airtable": "^0.10.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",

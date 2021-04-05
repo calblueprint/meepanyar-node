@@ -9,9 +9,11 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
+import { Tables } from "../airtable/schema";
+import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
-  Sites: async (siteRecord, authRecord) => {
+  [Tables.Sites]: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
       !siteRecord.fields.Users.includes(authRecord.id)
@@ -137,5 +139,19 @@ module.exports = {
     siteRecord.fields.PurchaseRequests = purchaseRequests;
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
+  },
+  [Tables.PurchaseRequests]: {
+    write: async (purchaseRequestRecord, authRecord) => {
+      if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
+        const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
+        try {
+          const photoUrl = await uploadBlob(generateFileName(), dataURI);
+          purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
+        } catch (error) {
+          console.log("Error in PurchaseRequests write resolver: ", error);
+        }
+      }
+      return purchaseRequestRecord;
+    },
   },
 };
