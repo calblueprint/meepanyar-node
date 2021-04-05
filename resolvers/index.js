@@ -9,7 +9,6 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
-const { matchCustomers } = require("../airtable/utils");
 import { Tables } from "../airtable/schema";
 import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
@@ -127,10 +126,12 @@ module.exports = {
     purchaseRequests = purchaseRequests.flat();
     inventoryUpdates = inventoryUpdates.flat();
 
-    matchCustomers(customers, meterReadings, payments);
+    // Customer Fields
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
+    siteRecord.fields.Payments = payments;
+    siteRecord.fields.MeterReadings = meterReadings;
 
     // Inventory fields
     siteRecord.fields.Products = products;
