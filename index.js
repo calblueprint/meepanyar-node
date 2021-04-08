@@ -1,12 +1,10 @@
-import Airlock from "airlock-server";
-import express from "express";
+import Airlock from 'airlock-server';
+import express from 'express';
 import {
   createCustomer,
   createInventory,
   createManyMeterReadingsandInvoices,
-  createManyPayments,
-  createMeterReadingsandInvoice,
-  createPayment
+  createManyPayments
 } from "./airtable/request";
 
 const airlockPort = process.env.PORT || 4000;
@@ -31,6 +29,8 @@ new Airlock({
     ]
 });
 
+// Larger limit used to handle base64 data URIs
+app.use(express.json({ limit: '200mb' }));
 app.use(express.json());
 
 app.get('/', (_, result) => {
@@ -86,41 +86,9 @@ app.post('/customers/create', async (request, result) => {
       }
 
       result.status(201);
-      result.json({ status: 'OK' })
+      result.json({ status: 'OK', id: customerId })
   } catch (err) {
       console.log(err);
-      result.status(400);
-      result.json({ error: err });
-  }
-})
-
-// Endpoint used to create meter readings when the meter reading
-// contains a customer id (the customer already exists in airtable).
-app.post('/meter-readings-and-invoices/create', async (request, result) => {
-  try {
-      const meterReadingData = request.body;
-      console.log("Meter reading data: ", meterReadingData);
-      const resultData = await createMeterReadingsandInvoice(meterReadingData);
-      result.status(201);
-      result.json({ status: 'OK', id: resultData });
-  } catch (err) {
-      console.log('Error when creating meter reading and invoice: ', err);
-      result.status(400);
-      result.json({ error: err });
-  }
-})
-
-// Endpoint used to create payments when the payment
-// contains a customer id (the customer already exists in airtable).
-app.post('/payments/create', async (request, result) => {
-  try {
-      const paymentData = request.body;
-      console.log("Payment data: ", paymentData);
-      const resultData = await createPayment(paymentData);
-      result.status(201);
-      result.json({ status: 'OK', id: resultData });
-  } catch (err) {
-      console.log('Error when creating payment: ', err);
       result.status(400);
       result.json({ error: err });
   }

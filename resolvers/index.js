@@ -10,14 +10,11 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
-const { matchCustomers } = require("../airtable/utils");
+import { Tables } from "../airtable/schema";
+import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
-  Users: restrictColumns((userRecord, authRecord) => {
-    console.log("User access resolver invoked");
-    return userRecord.id === authRecord.id;
-  }, ["Purchase Requests", "Purchase Requests 2", "Password", "Email", "Payments", "Meter Readings and Invoices", "Customer Updates", "Inventory Updates"]),
-  Sites: async (siteRecord, authRecord) => {
+  [Tables.Sites]: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
       !siteRecord.fields.Users.includes(authRecord.id)
@@ -130,10 +127,12 @@ module.exports = {
     purchaseRequests = purchaseRequests.flat();
     inventoryUpdates = inventoryUpdates.flat();
 
-    matchCustomers(customers, meterReadings, payments);
+    // Customer Fields
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
+    siteRecord.fields.Payments = payments;
+    siteRecord.fields.MeterReadings = meterReadings;
 
     // Inventory fields
     siteRecord.fields.Products = products;
@@ -141,5 +140,19 @@ module.exports = {
     siteRecord.fields.PurchaseRequests = purchaseRequests;
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
+  },
+  [Tables.PurchaseRequests]: {
+    write: async (purchaseRequestRecord, authRecord) => {
+      if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
+        const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
+        try {
+          const photoUrl = await uploadBlob(generateFileName(), dataURI);
+          purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
+        } catch (error) {
+          console.log("Error in PurchaseRequests write resolver: ", error);
+        }
+      }
+      return purchaseRequestRecord;
+    },
   },
 };
