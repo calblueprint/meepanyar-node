@@ -10,7 +10,7 @@ const {
   getInventoryUpdatesByIds,
 } = require("../airtable/request");
 import { Tables } from "../airtable/schema";
-const { matchCustomers } = require("../airtable/utils");
+import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
   [Tables.Sites]: async (siteRecord, authRecord) => {
@@ -126,10 +126,12 @@ module.exports = {
     purchaseRequests = purchaseRequests.flat();
     inventoryUpdates = inventoryUpdates.flat();
 
-    matchCustomers(customers, meterReadings, payments);
+    // Customer Fields
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
     siteRecord.fields.TariffPlans = tariffPlans;
+    siteRecord.fields.Payments = payments;
+    siteRecord.fields.MeterReadings = meterReadings;
 
     // Inventory fields
     siteRecord.fields.Products = products;
@@ -146,6 +148,20 @@ module.exports = {
       }
       console.log("Authorized", userRecord.fields.Username);
       return userRecord;
+    },
+  },
+  [Tables.PurchaseRequests]: {
+    write: async (purchaseRequestRecord, authRecord) => {
+      if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
+        const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
+        try {
+          const photoUrl = await uploadBlob(generateFileName(), dataURI);
+          purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
+        } catch (error) {
+          console.log("Error in PurchaseRequests write resolver: ", error);
+        }
+      }
+      return purchaseRequestRecord;
     },
   },
 };
