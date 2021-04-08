@@ -140,25 +140,28 @@ module.exports = {
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
     return siteRecord;
   },
-  [Tables.Users]: {
-    read: async (userRecord, authRecord) => {
-      if (authRecord.id !== userRecord.id && !authRecord.fields.Admin) {
-        console.log("ID mismatch or user is not an Admin.");
-        return false;
-      }
-      console.log("Authorized", userRecord.fields.Username);
-      return userRecord;
-    },
-  },
   [Tables.PurchaseRequests]: {
     write: async (purchaseRequestRecord, authRecord) => {
+      // Only allow admin users to review purchase requests
+      if (purchaseRequestRecord.fields.hasOwnProperty("Reviewer")) {
+        if (
+          authRecord.fields.Admin &&
+          purchaseRequestRecord.fields.Reviewer[0] === authRecord.id
+        ) {
+          return purchaseRequestRecord;
+        } else {
+          console.log("[Purchase Requests] Review access denied");
+          return false;
+        }
+      }
+
       if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
         const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
         try {
           const photoUrl = await uploadBlob(generateFileName(), dataURI);
           purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
         } catch (error) {
-          console.log("Error in PurchaseRequests write resolver: ", error);
+          console.log("[Purchase Requests] Error uploading image: ", error);
         }
       }
       return purchaseRequestRecord;
