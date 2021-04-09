@@ -142,13 +142,32 @@ module.exports = {
   },
   [Tables.PurchaseRequests]: {
     write: async (purchaseRequestRecord, authRecord) => {
+      // Only allow admin users to review purchase requests
+      // NOTE: "Pending" must exactly match the select label in Airtable + the enum on the frontend.
+      if (
+        purchaseRequestRecord.fields.hasOwnProperty("Status") &&
+        purchaseRequestRecord.fields.Status !== "Pending"
+      ) {
+        if (
+          authRecord.fields.Admin &&
+          purchaseRequestRecord.fields.hasOwnProperty("Reviewer") &&
+          purchaseRequestRecord.fields.Reviewer[0] === authRecord.id
+        ) {
+          return purchaseRequestRecord;
+        } else {
+          console.log(
+            "[Purchase Requests] Review access denied: reviewer may not have admin permissions."
+          );
+          return false;
+        }
+      }
       if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
         const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
         try {
           const photoUrl = await uploadBlob(generateFileName(), dataURI);
           purchaseRequestRecord.fields.Receipt = [{ url: photoUrl }];
         } catch (error) {
-          console.log("Error in PurchaseRequests write resolver: ", error);
+          console.log("[Purchase Requests] Error uploading image: ", error);
         }
       }
       return purchaseRequestRecord;
