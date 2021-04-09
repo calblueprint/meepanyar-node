@@ -143,9 +143,13 @@ module.exports = {
   [Tables.PurchaseRequests]: {
     write: async (purchaseRequestRecord, authRecord) => {
       // Only allow admin users to review purchase requests
-      if (purchaseRequestRecord.fields.hasOwnProperty("Reviewer")) {
+      if (
+        purchaseRequestRecord.fields.hasOwnProperty("Status") &&
+        purchaseRequestRecord.fields.Status !== "Pending"
+      ) {
         if (
           authRecord.fields.Admin &&
+          purchaseRequestRecord.fields.hasOwnProperty("Reviewer") &&
           purchaseRequestRecord.fields.Reviewer[0] === authRecord.id
         ) {
           return purchaseRequestRecord;
