@@ -143,6 +143,7 @@ module.exports = {
   [Tables.PurchaseRequests]: {
     write: async (purchaseRequestRecord, authRecord) => {
       // Only allow admin users to review purchase requests
+      // NOTE: "Pending" must exactly match the select label in Airtable + the enum on the frontend.
       if (
         purchaseRequestRecord.fields.hasOwnProperty("Status") &&
         purchaseRequestRecord.fields.Status !== "Pending"
@@ -154,7 +155,9 @@ module.exports = {
         ) {
           return purchaseRequestRecord;
         } else {
-          console.log("[Purchase Requests] Review access denied");
+          console.log(
+            "[Purchase Requests] Review access denied: reviewer may not have admin permissions."
+          );
           return false;
         }
       }
