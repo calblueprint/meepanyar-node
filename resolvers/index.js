@@ -1,4 +1,3 @@
-const { restrictColumns } = require("airlock-server");
 const {
   getCustomersByIds,
   getMeterReadingsandInvoicesByIds,
