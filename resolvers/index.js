@@ -161,7 +161,6 @@ module.exports = {
           return false;
         }
       }
-
       if (purchaseRequestRecord.fields.hasOwnProperty("Receipt")) {
         const dataURI = purchaseRequestRecord.fields.Receipt[0].url;
         try {
