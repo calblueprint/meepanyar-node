@@ -95,8 +95,14 @@ module.exports = {
     const siteUsersPromise = getAllUsers().then((result) =>
       result
         .filter((user) => user.siteIds?.includes(siteRecord.id))
-        .map(({ id, admin, username }) =>
-          siteUsers.push({ id, admin: admin || false, username })
+        .map(({ id, admin, username, name, siteIds }) =>
+          siteUsers.push({
+            id,
+            admin: admin || false,
+            username,
+            name,
+            siteIds,
+          })
         )
     );
     promises.push(siteUsersPromise);
