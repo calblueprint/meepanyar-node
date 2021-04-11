@@ -8,6 +8,7 @@ const {
   getInventorysByIds,
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
+  getAllUsers,
 } = require("../airtable/request");
 import { Tables } from "../airtable/schema";
 import { generateFileName, uploadBlob } from "../lib/photoUtils";
@@ -90,6 +91,22 @@ module.exports = {
       promises.push(inventoryPromise);
     }
 
+    const siteUsers = [];
+    const siteUsersPromise = getAllUsers().then((result) =>
+      result
+        .filter((user) => user.siteIds?.includes(siteRecord.id))
+        .map(({ id, admin, username, name, siteIds }) =>
+          siteUsers.push({
+            id,
+            admin: admin || false,
+            username,
+            name,
+            siteIds,
+          })
+        )
+    );
+    promises.push(siteUsersPromise);
+
     // Await all promises at once
     await Promise.all(promises);
     promises.length = 0; // clear promises
@@ -138,6 +155,10 @@ module.exports = {
     siteRecord.fields.SiteInventory = inventory;
     siteRecord.fields.PurchaseRequests = purchaseRequests;
     siteRecord.fields.InventoryUpdates = inventoryUpdates;
+
+    // Site Users
+    siteRecord.fields.SiteUsers = siteUsers;
+
     return siteRecord;
   },
   [Tables.PurchaseRequests]: {
