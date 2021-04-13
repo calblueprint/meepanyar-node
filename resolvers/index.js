@@ -14,7 +14,8 @@ import { Tables } from "../airtable/schema";
 import { generateFileName, uploadBlob } from "../lib/photoUtils";
 
 module.exports = {
-  [Tables.Sites]: async (siteRecord, authRecord) => {
+  [Tables.Sites]: {
+    read: async (siteRecord, authRecord) => {
     if (
       !siteRecord.fields.Users ||
       !siteRecord.fields.Users.includes(authRecord.id)
@@ -161,6 +162,10 @@ module.exports = {
 
     return siteRecord;
   },
+  write: async (siteRecord, authRecord) => {
+    return (authRecord.fields.Sites.includes(siteRecord.id) && authRecord.fields.Admin) || false
+  }
+},
   [Tables.PurchaseRequests]: {
     write: async (purchaseRequestRecord, authRecord) => {
       // Only allow admin users to review purchase requests
@@ -194,4 +199,29 @@ module.exports = {
       return purchaseRequestRecord;
     },
   },
+  [Tables.Users]: {
+    // Admin approval required to modify non-self Users
+    write: async (userRecord, authRecord) => {
+      const sameAccount = userRecord.id === authRecord.id;
+
+      // If user changed their own admin status, disallow
+      const incomingRecordAdminStatus = userRecord.fields.hasOwnProperty("Admin") ? userRecord.fields.Admin : authRecord.fields.Admin;
+      const adminStatusChanged = incomingRecordAdminStatus !== authRecord.fields.Admin;
+
+      const isAdmin = authRecord.fields.Admin || false;
+
+      if (sameAccount) {
+        // If changing the same account, allow if they didn't change their own admin status
+        return !adminStatusChanged
+      } else {
+        return isAdmin
+      }
+    }
+  },
+  [Tables.TariffPlans]:  {
+    // Admin approval required to modify tariff plans
+    write: async (tariffPlanRecord, authRecord) => {
+      return authRecord.fields.Admin || false;
+    }
+  }
 };
