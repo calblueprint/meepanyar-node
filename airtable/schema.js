@@ -35,6 +35,7 @@ export const Columns = {
 		inventoryUpdateIds: {name:`Inventory Updates`, type:`foreignKey-many`},
 		organization: {name:`Organization`, type:`text`},
 		admin: {name:`Admin`, type:`checkbox`},
+		inactive: {name:`Inactive`, type:`checkbox`},
 	},
 	"Sites": {
 		name: {name:`Name`, type:`text`},
@@ -54,6 +55,8 @@ export const Columns = {
 		customerIds: {name:`Customer`, type:`foreignKey-many`},
 		siteIds: {name:`Sites`, type:`foreignKey-many`},
 		id: {name:`ID`, type:`formula`},
+		numberOfCustomers: {name:`Number of Customers`, type:`count`},
+		meterTypes: {name:`Meter Types`, type:`multiSelect`},
 	},
 	"Customers": {
 		name: {name:`Name`, type:`text`},
@@ -72,6 +75,7 @@ export const Columns = {
 		meterType: {name:`Meter Type`, type:`select`},
 		customerNumber: {name:`Customer Number`, type:`number`},
 		startingMeterReading: {name:`Starting Meter Reading`, type:`number`},
+		startingMeterLastChanged: {name:`Starting Meter Last Changed`, type:`date`},
 	},
 	"Customer Updates": {
 		dateUpdated: {name:`Date Updated`, type:`date`},
