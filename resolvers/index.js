@@ -95,10 +95,11 @@ module.exports = {
     const siteUsersPromise = getAllUsers().then((result) =>
       result
         .filter((user) => user.siteIds?.includes(siteRecord.id))
-        .map(({ id, admin, username, name, siteIds }) =>
+        .map(({ id, admin, username, name, siteIds, inactive }) =>
           siteUsers.push({
             id,
             admin: admin || false,
+            inactive: inactive || false,
             username,
             name,
             siteIds,
