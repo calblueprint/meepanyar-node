@@ -9,9 +9,14 @@ const {
   getPurchaseRequestsByIds,
   getInventoryUpdatesByIds,
   getAllUsers,
+  getSiteById,
+  getCustomerById,
+  deleteMeterReadingsandInvoice
 } = require("../airtable/request");
 import { Tables } from "../airtable/schema";
 import { generateFileName, uploadBlob } from "../lib/photoUtils";
+import { getLatestMeterReadingForCustomer } from '../lib/meterReadingUtils';
+import moment from 'moment';
 
 module.exports = {
   [Tables.Sites]: {
@@ -223,6 +228,38 @@ module.exports = {
     // Admin approval required to modify tariff plans
     write: async (tariffPlanRecord, authRecord) => {
       return authRecord.fields.Admin || false;
+    }
+  },
+  [Tables.MeterReadingsandInvoices]: {
+    write: async (meterReadingRecord, authRecord) => {
+      try {
+        const customerId = meterReadingRecord.fields.Customer[0];
+        const customer = await getCustomerById(customerId);
+        const [latestMeterReading, site] = await Promise.all([getLatestMeterReadingForCustomer(customer), getSiteById(customer.siteId)]);
+
+        if (!latestMeterReading) {
+          console.log("Could not find a past meter reading, allowing meter reading by default")
+          return true
+        }
+
+        // We treat meter readings taken after the grace period deadline of the current month to be
+        // meter readings for the current month. This is to prevent conflicts with meter readings
+        // done on the 1st of the month that were meant to account for the previous month.
+        const periodStart = moment().startOf('month').add(site.gracePeriod, 'days');
+        const isCustomerMeteredForPeriod = moment(latestMeterReading.date).isSameOrAfter(periodStart);
+
+        // If Customer was metered for the period, we delete the older 
+        // meter reading to enforce 1 meter reading per period rule
+        if (isCustomerMeteredForPeriod) {
+          console.log('Existing meter reading already made for period. Deleting old one.')
+          deleteMeterReadingsandInvoice(latestMeterReading.id);
+        }
+
+      } catch (error) {
+        console.log('Error Checking Meter Reading, Allowing meter reading by default: ', error);
+      }
+
+      return true;
     }
   }
 };

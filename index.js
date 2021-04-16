@@ -58,17 +58,14 @@ app.get('/', (_, result) => {
   result.json({ status: 'OK' })
 })
 
-// This endpoint is used to create customers from the frontend.
-// To support offline functionality while keeping our API stateless,
-// we add meterReadings and payments for offline customers into the
-// customerData payload, and create meterReadings and payments for
-// the customer created after the customer has been created in airtable.
+// TODO: With the scope of offline functionality changed, we can deprecate this endpoint
+// and just use a standard airlock endpoint instead
 app.post('/customers/create', async (request, result) => {
   const customerData = request.body;
   console.log("Customer Creation Payload: ", customerData);
 
   try {
-      const { name, meterNumber, tariffPlanId, siteId, meterReadings, payments } = customerData;
+      const { name, meterNumber, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
       const hasMeter = meterNumber ? true : false;
       const isActive = true;
 
@@ -78,7 +75,9 @@ app.post('/customers/create', async (request, result) => {
           tariffPlanId,
           siteId,
           name,
-          meterNumber
+          meterNumber,
+          startingMeterReading,
+          startingMeterLastChanged
       };
 
       const customerId = await createCustomer(airtableCustomerData);
