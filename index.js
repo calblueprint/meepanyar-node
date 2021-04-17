@@ -65,7 +65,7 @@ app.post('/customers/create', async (request, result) => {
   console.log("Customer Creation Payload: ", customerData);
 
   try {
-      const { name, meterNumber, meterType, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
+      const { name, customerNumber, meterNumber, meterType, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
       const hasMeter = meterNumber ? true : false;
       const isActive = true;
 
@@ -75,6 +75,7 @@ app.post('/customers/create', async (request, result) => {
           tariffPlanId,
           siteId,
           name,
+          customerNumber,
           meterNumber,
           startingMeterReading,
           startingMeterLastChanged,
