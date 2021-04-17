@@ -65,7 +65,7 @@ app.post('/customers/create', async (request, result) => {
   console.log("Customer Creation Payload: ", customerData);
 
   try {
-      const { name, meterNumber, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
+      const { name, meterNumber, meterType, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
       const hasMeter = meterNumber ? true : false;
       const isActive = true;
 
@@ -77,7 +77,8 @@ app.post('/customers/create', async (request, result) => {
           name,
           meterNumber,
           startingMeterReading,
-          startingMeterLastChanged
+          startingMeterLastChanged,
+          meterType
       };
 
       const customerId = await createCustomer(airtableCustomerData);
