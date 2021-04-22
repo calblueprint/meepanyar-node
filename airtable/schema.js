@@ -55,8 +55,8 @@ export const Columns = {
 		customerIds: {name:`Customer`, type:`foreignKey-many`},
 		siteIds: {name:`Sites`, type:`foreignKey-many`},
 		id: {name:`ID`, type:`formula`},
-		meterTypes: {name:`Meter Types`, type:`multiSelect`},
 		numberOfCustomers: {name:`Number of Customers`, type:`count`},
+		meterTypes: {name:`Meter Types`, type:`multiSelect`},
 	},
 	"Customers": {
 		name: {name:`Name`, type:`text`},
@@ -119,6 +119,8 @@ export const Columns = {
 		lastUpdated: {name:`Last Updated`, type:`date`},
 		issubmitted: {name:`isSubmitted`, type:`checkbox`},
 		id: {name:`ID`, type:`formula`},
+		inventoryAmountApproved: {name:`Inventory Amount Approved`, type:`number`},
+		inventoryAmountDenied: {name:`Inventory Amount Denied`, type:`number`},
 	},
 	"Products": {
 		primaryKey: {name:`Primary Key`, type:`formula`},
