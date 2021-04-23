@@ -1,6 +1,6 @@
-import Airlock from 'airlock-server';
-import express from 'express';
-import moment from 'moment';
+import Airlock from "airlock-server";
+import express from "express";
+import moment from "moment";
 import {
   createCustomer,
   createFinancialSummarie,
@@ -16,15 +16,17 @@ import {
   getFinancialSummariesByIds,
   getPurchaseRequestsByIds,
   getSiteById,
-  updateFinancialSummarie
+  updateFinancialSummarie,
 } from "./airtable/request";
 import {
   calculateNumCustomersBilled,
-  calculateNumCustomersPaid, calculateTotalActiveCustomers,
+  calculateNumCustomersPaid,
+  calculateTotalActiveCustomers,
   calculateTotalAmountBilled,
   calculateTotalAmountCollected,
-  calculateTotalAmountSpent, calculateTotalUsage
-} from './lib/financialSummaryUtils';
+  calculateTotalAmountSpent,
+  calculateTotalUsage,
+} from "./lib/financialSummaryUtils";
 
 
 const airlockPort = process.env.PORT || 4000;
