@@ -151,6 +151,7 @@ app.post("/meter-readings-invoice/create", async (request, result) => {
       customerId: customer.id,
       amountBilled: tariffPlan.fixedTariff,
       date: moment().toISOString(),
+      reading: 0,
     }
   
     console.log("Creating invoice:", invoice);
