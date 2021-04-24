@@ -119,6 +119,8 @@ app.post('/customers/create', async (request, result) => {
 
 // Endpoint to create a new inventory item and an initial inventory update.
 // Assumes that the site, user, and product already exist in Airtable.
+// This custom endpoint is needed to account for offline functionality which 
+// requires that both items are created in a single endpoint.
 app.post("/inventory/create", async (request, result) => {
   try {
     const requestData = request.body;
@@ -155,6 +157,8 @@ app.post("/inventory/create", async (request, result) => {
 // Endpoint to create a new product, as well as a corresponding
 // inventory and inventory update record.
 // Assumes that the site and user exist in Airtable.
+// This custom endpoint is needed to account for offline functionality which 
+// requires that all three items are created in a single endpoint.
 app.post("/products/create", async (request, result) => {
   try {
     const {startingAmount, siteId, userId, ...product} = request.body;
