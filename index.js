@@ -7,13 +7,16 @@ import {
   createInventory,
   createManyMeterReadingsandInvoices,
   createManyPayments,
+  createMeterReadingsandInvoice,
   getAllInventorys,
   getAllMeterReadingsandInvoices,
   getAllPayments,
+  getCustomerById,
   getCustomersByIds,
   getFinancialSummariesByIds,
   getPurchaseRequestsByIds,
   getSiteById,
+  getTariffPlanById,
   updateFinancialSummarie
 } from "./airtable/request";
 
@@ -136,6 +139,33 @@ app.post("/inventory/create", async (request, result) => {
     result.json({ error: err });
   }
 });
+
+// Endpoint used to create a new MeterReadingAndInvoice record for a customer
+// with no meter by charging the value of the Fixed Tariff from their Tariff Plan.
+app.post("/meter-readings-invoice/create", async (request, result) => {
+  const { customerId } = request.body;
+  try {
+    const customer = await getCustomerById(customerId);
+    const tariffPlan = await getTariffPlanById(customer.tariffPlanId);
+    const invoice = {
+      customerId: customer.id,
+      amountBilled: tariffPlan.fixedTariff,
+      date: moment().toISOString(),
+    }
+  
+    console.log("Creating invoice:", invoice);
+    const invoiceId = await createMeterReadingsandInvoice(invoice);
+    console.log("Invoice created! ID:", invoiceId);
+    
+    result.status(201);
+    result.json({ status: 'OK', id: invoiceId })
+
+  } catch (error) {
+    console.error("Error creating meter reading and invoice: ", error)
+    result.status(400);
+    result.json({ status: 'ERROR', error: error })
+  }
+})
 
 // Note: There are ways to do these calculations with less API requests by adding more lookups to the schema
 // however, this job is to be run once a day and is not predicted to be particularly intensive.
