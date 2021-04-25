@@ -24,6 +24,7 @@
     "generate-schema": "generate-airtable-schema",
     "start": "babel-node index.js",
     "update-summaries": "babel-node -r dotenv/config scripts/updateFinancialSummaryData.js",
+    "charge-no-meter-customers": "babel-node -r dotenv/config scripts/chargeNoMeterCustomers.js",
     "generate-keys": "cd config && openssl genrsa -out jwt.key 2048 && openssl rsa -in jwt.key -outform PEM -pubout -out jwt.key.pub",
     "heroku-postbuild": "npm run generate-keys"
   },
