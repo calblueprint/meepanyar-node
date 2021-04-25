@@ -1,12 +1,14 @@
-import Airlock from 'airlock-server';
-import express from 'express';
-import moment from 'moment';
+import Airlock from "airlock-server";
+import express from "express";
+import moment from "moment";
 import {
   createCustomer,
   createFinancialSummarie,
   createInventory,
+  createInventoryUpdate,
   createManyMeterReadingsandInvoices,
   createManyPayments,
+  createProduct,
   createMeterReadingsandInvoice,
   getAllInventorys,
   getAllMeterReadingsandInvoices,
@@ -16,19 +18,20 @@ import {
   getFinancialSummariesByIds,
   getPurchaseRequestsByIds,
   getSiteById,
+  updateFinancialSummarie,
   getTariffPlanById,
   updateFinancialSummarie
 } from "./airtable/request";
-
 import {
-  calculateTotalActiveCustomers,
   calculateNumCustomersBilled,
   calculateNumCustomersPaid,
+  calculateTotalActiveCustomers,
   calculateTotalAmountBilled,
-  calculateTotalUsage,
   calculateTotalAmountCollected,
-  calculateTotalAmountSpent
-} from './lib/financialSummaryUtils';
+  calculateTotalAmountSpent,
+  calculateTotalUsage,
+} from "./lib/financialSummaryUtils";
+
 
 const airlockPort = process.env.PORT || 4000;
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -118,23 +121,85 @@ app.post('/customers/create', async (request, result) => {
   }
 })
 
-// Endpoint used to create a new inventory item.
-// Contains a site id (the site already exists in airtable).
+// Endpoint to create a new inventory item and an initial inventory update.
+// Assumes that the site, user, and product already exist in Airtable.
+// This custom endpoint is needed to account for offline functionality which 
+// requires that both items are created in a single endpoint.
 app.post("/inventory/create", async (request, result) => {
   try {
-    const inventoryData = request.body;
-    // Remove the blank id field
-    delete inventoryData.id;
-    console.log("Inventory data: ", inventoryData);
+    const requestData = request.body;
+    const {userId, ...inventory} = requestData;
+    delete inventory.id; // Remove the blank id field
+    console.log("Inventory data: ", inventory);
 
-    const inventoryId = await createInventory(inventoryData);
+    const inventoryId = await createInventory(inventory);
     console.log("Inventory id:", inventoryId);
-    console.log("Inventory created!");
+    console.log("Inventory created!\n\n");
+
+    const inventoryUpdate = {
+      userId: userId,
+      previousQuantity: 0,
+      updatedQuantity: inventory.currentQuantity,
+      inventoryId: inventoryId,
+      createdAt: moment().toISOString(),
+    }
+
+    console.log("Inventory Update data: ", inventory);
+    const inventoryUpdateId = await createInventoryUpdate(inventoryUpdate);
+    console.log("Inventory Update id:", inventoryUpdateId);
+    console.log("Inventory Update created!\n\n");
 
     result.status(201);
-    result.json({ status: "OK", id: inventoryId });
+    result.json({ status: "OK", inventoryId, inventoryUpdateId });
   } catch (err) {
-    console.log("Error when creating inventory: ", err);
+    console.log("Error when creating inventory and/or update: ", err);
+    result.status(400);
+    result.json({ error: err });
+  }
+});
+
+// Endpoint to create a new product, as well as a corresponding
+// inventory and inventory update record.
+// Assumes that the site and user exist in Airtable.
+// This custom endpoint is needed to account for offline functionality which 
+// requires that all three items are created in a single endpoint.
+app.post("/products/create", async (request, result) => {
+  try {
+    const {startingAmount, siteId, userId, ...product} = request.body;
+
+    delete product.id; // Remove the blank id field
+    console.log("Product data: ", product);
+    const productId = await createProduct(product);
+    console.log("Product id:", productId);
+    console.log("Product created!\n\n");
+
+    const inventory = {
+      productId,
+      siteId,
+      currentQuantity: startingAmount,
+      periodStartQuantity: startingAmount,
+    }
+    console.log("Inventory data: ", inventory);
+    const inventoryId = await createInventory(inventory);
+    console.log("Inventory id:", inventoryId);
+    console.log("Inventory created! \n\n");
+
+    const inventoryUpdate = {
+      userId: userId,
+      previousQuantity: 0,
+      updatedQuantity: startingAmount,
+      inventoryId: inventoryId,
+      createdAt: moment().toISOString(),
+    }
+    console.log("Inventory Update data: ", inventoryUpdate);
+    const inventoryUpdateId = await createInventoryUpdate(inventoryUpdate);
+    console.log("Inventory Update id:", inventoryUpdateId);
+    console.log("Inventory Update created! \n\n");
+
+    result.status(201);
+    result.json({ status: "OK", productId, inventoryId, inventoryUpdateId });
+  } catch (err) {
+    console.log("Error when creating product, inventory, and/or inventory update: ", err);
     result.status(400);
     result.json({ error: err });
   }
