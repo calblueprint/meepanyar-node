@@ -20,7 +20,7 @@ import {
   getSiteById,
   updateFinancialSummarie,
   getTariffPlanById,
-  updateFinancialSummarie
+  updateCustomer
 } from "./airtable/request";
 import {
   calculateNumCustomersBilled,
@@ -31,6 +31,7 @@ import {
   calculateTotalAmountSpent,
   calculateTotalUsage,
 } from "./lib/financialSummaryUtils";
+import { getLatestMeterReadingForCustomer } from "./lib/meterReadingUtils";
 
 
 const airlockPort = process.env.PORT || 4000;
@@ -42,17 +43,17 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 new Airlock({
-    // port: airlockPort,
-    server: app,
-    airtableApiKey: [apiKey],
-    airtableBaseId: process.env.AIRTABLE_BASE_ID,
-    airtableUserTableName: 'Users',
-    airtableUsernameColumn: 'Username',
-    airtablePasswordColumn: 'Password',
-    allowedOrigins: [
-        PRODUCTION_WEB_URL,
-        ...DEVELOPMENT_WEB_URLS
-    ]
+  // port: airlockPort,
+  server: app,
+  airtableApiKey: [apiKey],
+  airtableBaseId: process.env.AIRTABLE_BASE_ID,
+  airtableUserTableName: 'Users',
+  airtableUsernameColumn: 'Username',
+  airtablePasswordColumn: 'Password',
+  allowedOrigins: [
+    PRODUCTION_WEB_URL,
+    ...DEVELOPMENT_WEB_URLS
+  ]
 });
 
 // Larger limit used to handle base64 data URIs
@@ -71,53 +72,53 @@ app.post('/customers/create', async (request, result) => {
   console.log("Customer Creation Payload: ", customerData);
 
   try {
-      const { name, customerNumber, meterNumber, meterType, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
-      const hasMeter = meterNumber ? true : false;
-      const isActive = true;
+    const { name, customerNumber, meterNumber, meterType, tariffPlanId, siteId, meterReadings, payments, startingMeterReading, startingMeterLastChanged } = customerData;
+    const hasMeter = meterNumber ? true : false;
+    const isActive = true;
 
-      const airtableCustomerData = {
-          isactive: isActive,
-          hasmeter: hasMeter,
-          tariffPlanId,
-          siteId,
-          name,
-          customerNumber,
-          meterNumber,
-          startingMeterReading,
-          startingMeterLastChanged,
-          meterType
-      };
+    const airtableCustomerData = {
+      isactive: isActive,
+      hasmeter: hasMeter,
+      tariffPlanId,
+      siteId,
+      name,
+      customerNumber,
+      meterNumber,
+      startingMeterReading,
+      startingMeterLastChanged,
+      meterType
+    };
 
-      const customerId = await createCustomer(airtableCustomerData);
-      console.log("Customer id: ", customerId);
-      console.log("Customer created!");
+    const customerId = await createCustomer(airtableCustomerData);
+    console.log("Customer id: ", customerId);
+    console.log("Customer created!");
 
-      if (meterReadings) {
-          try {
-              meterReadings.forEach(meterReading => meterReading.customerId = customerId);
-              createManyMeterReadingsandInvoices(meterReadings);
-              console.log("Created meter readings")
-          } catch (err) {
-              console.log("Meter reading error: ", err);
-          }
+    if (meterReadings) {
+      try {
+        meterReadings.forEach(meterReading => meterReading.customerId = customerId);
+        createManyMeterReadingsandInvoices(meterReadings);
+        console.log("Created meter readings")
+      } catch (err) {
+        console.log("Meter reading error: ", err);
       }
+    }
 
-      if (payments) {
-          try {
-              payments.forEach(payment => payment.customerId = customerId);
-              createManyPayments(payments)
-              console.log("Created payments")
-          } catch (err) {
-              console.log("Payments error: ", err);
-          }
+    if (payments) {
+      try {
+        payments.forEach(payment => payment.customerId = customerId);
+        createManyPayments(payments)
+        console.log("Created payments")
+      } catch (err) {
+        console.log("Payments error: ", err);
       }
+    }
 
-      result.status(201);
-      result.json({ status: 'OK', id: customerId })
+    result.status(201);
+    result.json({ status: 'OK', id: customerId })
   } catch (err) {
-      console.log(err);
-      result.status(400);
-      result.json({ error: err });
+    console.log(err);
+    result.status(400);
+    result.json({ error: err });
   }
 })
 
@@ -128,7 +129,7 @@ app.post('/customers/create', async (request, result) => {
 app.post("/inventory/create", async (request, result) => {
   try {
     const requestData = request.body;
-    const {userId, ...inventory} = requestData;
+    const { userId, ...inventory } = requestData;
     delete inventory.id; // Remove the blank id field
     console.log("Inventory data: ", inventory);
 
@@ -165,7 +166,7 @@ app.post("/inventory/create", async (request, result) => {
 // requires that all three items are created in a single endpoint.
 app.post("/products/create", async (request, result) => {
   try {
-    const {startingAmount, siteId, userId, ...product} = request.body;
+    const { startingAmount, siteId, userId, ...product } = request.body;
 
     delete product.id; // Remove the blank id field
     console.log("Product data: ", product);
@@ -218,13 +219,45 @@ app.post("/meter-readings-invoice/create", async (request, result) => {
       date: moment().toISOString(),
       reading: 0,
     }
-  
+
     console.log("Creating invoice:", invoice);
     const invoiceId = await createMeterReadingsandInvoice(invoice);
     console.log("Invoice created! ID:", invoiceId);
-    
+
     result.status(201);
     result.json({ status: 'OK', id: invoiceId })
+
+  } catch (error) {
+    console.error("Error creating meter reading and invoice: ", error)
+    result.status(400);
+    result.json({ status: 'ERROR', error: error })
+  }
+})
+
+// Endpoint updates a Customer's Starting Meter Reading to the Customer's latest meter reading
+// with no meter by charging the value of the Fixed Tariff from their Tariff Plan.
+// If no meter reading has been made yet for the customer, the starting meter reading is left unchanged.
+app.post("/starting-meter-reading/update", async (request, result) => {
+  const { customerId } = request.body;
+  try {
+    const customer = await getCustomerById(customerId);
+    const latestMeterReading = await getLatestMeterReadingForCustomer(customer);
+
+    if (!latestMeterReading) {
+      console.log(`(updateCustomerStartingMeter) ${customerId} has not yet been metered`)
+      result.status(200);
+      result.json({ status: 'OK' })
+      return;
+    }
+
+    const latestReadingAmount = latestMeterReading.reading;
+    const readingDate = latestMeterReading.date;
+
+    console.log(`(updateCustomerStartingMeter) Newest Reading: ${latestMeterReading} and Date: ${readingDate}`)
+    updateCustomer(customerId, { startingMeterReading: latestReadingAmount }, { startingMeterLastChanged: readingDate });
+
+    result.status(201);
+    result.json({ status: 'OK' })
 
   } catch (error) {
     console.error("Error creating meter reading and invoice: ", error)
