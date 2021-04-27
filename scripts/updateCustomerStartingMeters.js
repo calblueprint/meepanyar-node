@@ -12,6 +12,7 @@ const updateCustomerStartingMeters = async () => {
   try {
     const meteredCustomers = await getAllCustomers("{Meter Type} != 'No Meter'");
     meteredCustomers.forEach(async (customer) => {
+      // We await here to minimize the chance this script encounters Airtable rate limits
       await updateCustomerStartingMeter(customer.id);
     });
   } catch (err) {
@@ -37,12 +38,15 @@ const updateCustomerStartingMeter = async (customerId) => {
   }
 };
 
-// Corresponds to the customer named "Offline Customer"
+// Corresponds to the customer named "Offline Customer" (Has meter readings)
 const testUpdateCustomerStartingMeter = () => updateCustomerStartingMeter('recEa415yyWRft0xE');
 
-// Corresponds to the customer named "Created Customer"
+// Corresponds to the customer named "Created Customer" (No meter readings)
 const testUpdateCustomerWithoutMeterReading = () => updateCustomerStartingMeter('rec20H5LwmMok670M');
 
-// updateCustomerStartingMeters();
+// To test: Comment out this and run the script to only run the updates on single customers
+updateCustomerStartingMeters();
+
+// THE BELOW IS FOR TESTING AND  WILL BE REMOVED BEFORE THE PR IS MERGED
 testUpdateCustomerStartingMeter();
 testUpdateCustomerWithoutMeterReading();
