@@ -20,7 +20,6 @@ import {
   getSiteById,
   updateFinancialSummarie,
   getTariffPlanById,
-  updateFinancialSummarie
 } from "./airtable/request";
 import {
   calculateNumCustomersBilled,
