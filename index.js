@@ -28,7 +28,8 @@ import {
   calculateTotalActiveCustomers,
   calculateTotalAmountBilled,
   calculateTotalAmountCollected,
-  calculateTotalAmountSpent,
+  calculateTotalAmountApproved,
+  calculateTotalAmountDenied,
   calculateTotalUsage,
 } from "./lib/financialSummaryUtils";
 import { getLatestMeterReadingForCustomer } from "./lib/meterReadingUtils";
@@ -295,7 +296,8 @@ app.post("/financial-summaries/update", async (request, result) => {
     const totalUsage = calculateTotalUsage(siteMonthlyMeterReadings);
     const totalAmountBilled = calculateTotalAmountBilled(siteMonthlyMeterReadings);
     const totalAmountCollected = calculateTotalAmountCollected(siteMonthlyPayments);
-    const totalAmountSpent = calculateTotalAmountSpent(siteMonthlyPurchaseRequests);
+    const totalAmountApproved = calculateTotalAmountApproved(siteMonthlyPurchaseRequests);
+    const totalAmountDenied = calculateTotalAmountDenied(siteMonthlyPurchaseRequests);
 
     console.log(`numActiveCustomers: ${numActiveCustomers},
       numCustomersBilled: ${numCustomersBilled},
@@ -303,7 +305,10 @@ app.post("/financial-summaries/update", async (request, result) => {
       totalAmountBilled: ${totalAmountBilled},
       totalUsage: ${totalUsage},
       totalAmountCollected: ${totalAmountCollected},
-      totalAmountSpent: ${totalAmountSpent}`)
+      inventoryAmountApproved: ${totalAmountApproved},
+      inventoryAmountDenied: ${totalAmountDenied},
+      period: ${year}-${month}`
+      )
 
     const financialSummaryObject = {
       siteId: site.id,
@@ -313,7 +318,9 @@ app.post("/financial-summaries/update", async (request, result) => {
       totalUsage: totalUsage,
       totalAmountBilled: totalAmountBilled,
       totalAmountCollected: totalAmountCollected,
-      totalAmountSpent: totalAmountSpent,
+      totalAmountSpent: totalAmountApproved,
+      inventoryAmountApproved: totalAmountApproved,
+      inventoryAmountDenied: totalAmountDenied,
       period: `${year}-${month}`,
       lastUpdated: moment().toISOString(),
     }
