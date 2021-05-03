@@ -5,9 +5,9 @@ require("dotenv").config();
 
 const SERVER_URL = process.env.SERVER_URL;
 
-// This script is to be run once a month by Heroku Scheduler
-// It updates each Customer's "Starting Meter Reading" and "Starting Meter Last Changed" in Airtable
-// Modify the frequency of how often this script is run via the Heroku Scheduler Portal.
+// This script updates each Customer's "Starting Meter Reading" and "Starting Meter Last Changed" in Airtable.
+// Those column values are used to calculate the period usage for each customer when meter readings are logged.
+// This script is to be run once a month (can be set up as a cron job via something like Heroku Scheduler).
 const updateCustomerStartingMeters = async () => {
   try {
     const meteredCustomers = await getAllCustomers("{Meter Type} != 'No Meter'");
@@ -38,15 +38,4 @@ const updateCustomerStartingMeter = async (customerId) => {
   }
 };
 
-// Corresponds to the customer named "Offline Customer" (Has meter readings)
-const testUpdateCustomerStartingMeter = () => updateCustomerStartingMeter('recEa415yyWRft0xE');
-
-// Corresponds to the customer named "Created Customer" (No meter readings)
-const testUpdateCustomerWithoutMeterReading = () => updateCustomerStartingMeter('rec20H5LwmMok670M');
-
-// To test: Comment out this and run the script to only run the updates on single customers
 updateCustomerStartingMeters();
-
-// THE BELOW IS FOR TESTING AND  WILL BE REMOVED BEFORE THE PR IS MERGED
-testUpdateCustomerStartingMeter();
-testUpdateCustomerWithoutMeterReading();
