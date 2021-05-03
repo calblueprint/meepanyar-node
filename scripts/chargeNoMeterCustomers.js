@@ -5,10 +5,9 @@ require("dotenv").config();
 
 const SERVER_URL = process.env.SERVER_URL;
 
-// This script is to be run once a month by Heroku Scheduler
-// It creates a MeterReadingAndInvoice record for the customer and charges the Fixed Tariff value
-// from their tariff plan.
-// Modify the frequency of how often this script is run via the Heroku Scheduler Portal.
+// This script creates a MeterReadingAndInvoice record for customers that have "No Meter" 
+// by charging the Fixed Tariff Value from their tariff plan.
+// This script is to be run once a month (can be set up as a cron job via something like Heroku Scheduler).
 const chargeNoMeter = async () => {
   try {
     const noMeterCustomers = await getAllCustomers("{Meter Type} = 'No Meter'");

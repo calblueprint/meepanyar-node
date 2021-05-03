@@ -7,10 +7,8 @@ require('dotenv').config()
 
 const SERVER_URL = process.env.SERVER_URL;
 
-// This script is to be run once a day by Heroku Scheduler
 // It recalculates and updates financial summary data for all sites.
-// On the first day of the new month, it will also recalculate the previous month's data.
-// Modify the frequency of how often this script is run via the Heroku Scheduler Portal
+// This script is to be run once a day (can be set up as a cron job via something like Heroku Scheduler).
 const updateFinancialSummaryData = async () => {
     const currentDate = moment();
     const currentMonth = currentDate.format('MM');
