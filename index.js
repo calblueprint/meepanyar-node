@@ -325,19 +325,19 @@ app.post("/financial-summaries/update", async (request, result) => {
       lastUpdated: moment().toISOString(),
     }
 
-    // const financialSummaryList = await getFinancialSummariesByIds(site.financialSummarieIds, `{PERIOD}='${year}-${month}'`);
-    // const existingFinancialSummary = financialSummaryList[0]; // Returns undefined if list is empty
+    const financialSummaryList = await getFinancialSummariesByIds(site.financialSummarieIds, `{PERIOD}='${year}-${month}'`);
+    const existingFinancialSummary = financialSummaryList[0]; // Returns undefined if list is empty
 
-    // // Update existing financial summary if it exists, otherwise create a new one
-    // let financialSummaryId = '';
-    // if (existingFinancialSummary) {
-    //   financialSummaryId = await updateFinancialSummarie(existingFinancialSummary.id, financialSummaryObject)
-    // } else {
-    //   financialSummaryId = await createFinancialSummarie(financialSummaryObject)
-    // }
+    // Update existing financial summary if it exists, otherwise create a new one
+    let financialSummaryId = '';
+    if (existingFinancialSummary) {
+      financialSummaryId = await updateFinancialSummarie(existingFinancialSummary.id, financialSummaryObject)
+    } else {
+      financialSummaryId = await createFinancialSummarie(financialSummaryObject)
+    }
 
     result.status(201);
-    result.json({ status: 'OK', id: 100 })
+    result.json({ status: 'OK', id: financialSummaryId })
 
   } catch (error) {
     console.error("Error in updating financial summary: ", error)
