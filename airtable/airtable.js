@@ -97,6 +97,8 @@ const toAirtableFormat = (record, table) => {
 // Given a table and a record object, create a record on Airtable.
 function createRecord(table, record) {
   const transformedRecord = toAirtableFormat(record, table);
+
+  // Typecast is needed for some "Create" requests, do not remove.
   return base(table)
     .create([{ fields: transformedRecord }], { typecast: true })
     .then((records) => {

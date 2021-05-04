@@ -150,6 +150,10 @@ module.exports = {
     purchaseRequests = purchaseRequests.flat();
     inventoryUpdates = inventoryUpdates.flat();
 
+    // The names of the below fields should match the objects
+    // with type "custom-object" found in `meepanyar/src/lib/airtable/schema.js`.
+    // It is important they have identical names or they will not transfer correctly.
+
     // Customer Fields
     siteRecord.fields.CustomerData = customers;
     siteRecord.fields.FinancialSummaries = financialSummaries;
